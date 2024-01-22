@@ -1,0 +1,185 @@
+---
+title: "Low-depth Illumina polishing"
+date: "2024-01-22"
+author: "Ryan Wick"
+output:
+  html_document:
+    pandoc_args: ["+RTS", "-K64m", "-RTS", "--self-contained",]
+    df_print: paged
+    keep_md: false
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+```{r collapse=TRUE}
+library(tidyverse)
+library(knitr)
+library(readr)
+library(dplyr)
+
+opts_chunk$set(dpi=300, fig.path='plots/', echo=TRUE, dev=c('png','pdf'), warning=FALSE, message=FALSE)
+pdf.options(useDingbats = FALSE)
+```
+
+
+Load data from `results.tsv` and process it a bit. I add a column which contains the number of errors in the draft (pre-Illumina-polish) genomes:
+```{r load_data}
+per_genome_results <- read_delim("results.tsv", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
+colnames(per_genome_results) <- c("genome", "depth", "polishing", "errors")
+per_genome_results$depth <- as.numeric(per_genome_results$depth)
+per_genome_results <- per_genome_results %>% pivot_wider(names_from = polishing, values_from = errors)
+
+per_genome_results <- per_genome_results %>%
+  mutate(before_polish = case_when(
+    genome == "ATCC_10708_Salmonella_enterica" ~ 3,
+    genome == "ATCC_14035_Vibrio_cholerae" ~ 2,
+    genome == "ATCC_17802_Vibrio_parahaemolyticus" ~ 2,
+    genome == "ATCC_19119_Listeria_ivanovii" ~ 5,
+    genome == "ATCC_25922_Escherichia_coli" ~ 1,
+    genome == "ATCC_33560_Campylobacter_jejuni" ~ 5,
+    genome == "ATCC_35221_Campylobacter_lari" ~ 18,
+    genome == "ATCC_35897_Listeria_welshimeri" ~ 1,
+    genome == "ATCC_BAA-679_Listeria_monocytogenes" ~ 0))
+```
+
+Make a dataframe with the error counts totalled over all nine genomes:
+```{r totals}
+total_results <- per_genome_results %>%
+  group_by(depth) %>%
+  summarise(before_polish = sum(before_polish),
+            polypolish_errors = sum(Polypolish),
+            polypolish_careful_errors = sum(`Polypolish-careful`),
+            pypolca_errors = sum(pypolca),
+            pypolca_careful_errors = sum(`pypolca-careful`),
+            hypo_errors = sum(HyPo),
+            fmlrc2_errors = sum(FMLRC2),
+            nextpolish_errors = sum(NextPolish),
+            polypolish_pypolca_errors = sum(`Polypolish+pypolca`),
+            polypolish_careful_pypolca_careful_errors = sum(`Polypolish-careful+pypolca-careful`),
+            polypolish_careful_pypolca_errors = sum(`Polypolish-careful+pypolca`),
+            polypolish_pypolca_careful_errors = sum(`Polypolish+pypolca-careful`),
+            pypolca_polypolish_errors = sum(`pypolca+Polypolish`),
+            pypolca_careful_polypolish_careful_errors = sum(`pypolca-careful+Polypolish-careful`),
+            pypolca_careful_polypolish_errors = sum(`pypolca-careful+Polypolish`),
+            pypolca_polypolish_careful_errors = sum(`pypolca+Polypolish-careful`))
+```
+
+Plot the total errors vs Illumina depth for each polisher and polisher combination. These plots cap the y-axis at 45 and indicate peak errors with text as necessary:
+```{r plot_to_45, fig.width = 8, fig.height = 5}
+plot_to_45 <- function(column_name, polisher_name) {
+  title <- paste("Total errors after", polisher_name)
+  peak_index <- which.max(total_results[[column_name]])
+  peak_errors <- total_results[[column_name]][peak_index]
+  peak_depth <- total_results$depth[peak_index]
+  peak_label = paste("peak:\n", peak_errors, " errors", sep="")
+  p <- ggplot(total_results, aes(x=depth, y=!!sym(column_name))) +
+    geom_hline(yintercept = 37, color="darkblue", linetype = "dashed") +
+    geom_point(color="darkslategray") + 
+    theme_bw() +
+    scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 45), expand = c(0, 0)) +
+    labs(title=title, x="Illumina depth", y="Errors")
+  if (peak_errors > 45) {
+    p <- p +
+      annotate("text", label=peak_label, x=7.5, y=42.5, colour="darkred", lineheight = 0.9)
+  }
+  return(p)
+}
+
+plot_to_45("polypolish_errors", "Polypolish (defaults)")
+plot_to_45("polypolish_careful_errors", "Polypolish --careful")
+plot_to_45("pypolca_errors", "pypolca (defaults)")
+plot_to_45("pypolca_careful_errors", "pypolca --careful")
+plot_to_45("hypo_errors", "HyPo")
+plot_to_45("fmlrc2_errors", "FMLRC2")
+plot_to_45("nextpolish_errors", "NextPolish")
+
+plot_to_45("polypolish_pypolca_errors", "Polypolish (defaults) + pypolca (defaults)")
+plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish --careful + pypolca --careful")
+plot_to_45("polypolish_careful_pypolca_errors", "Polypolish --careful + pypolca (defaults)")
+plot_to_45("polypolish_pypolca_careful_errors", "Polypolish (defaults) + pypolca --careful")
+plot_to_45("pypolca_polypolish_errors", "pypolca (defaults) + Polypolish (defaults)")
+plot_to_45("pypolca_careful_polypolish_careful_errors", "pypolca --careful + Polypolish --careful")
+plot_to_45("pypolca_careful_polypolish_errors", "pypolca --careful + Polypolish (defaults)")
+plot_to_45("pypolca_polypolish_careful_errors", "pypolca (defaults) + Polypolish --careful")
+```
+
+For the polishers/combinations that exceed 45 total errors, plot them with their full range:
+```{r plot_full_range, fig.width = 8, fig.height = 5}
+plot_full_range <- function(column_name, polisher_name) {
+  title <- paste("Total errors after", polisher_name)
+  max_y <- max(total_results[[column_name]], na.rm = TRUE) * 1.05
+  p <- ggplot(total_results, aes(x=depth, y=!!sym(column_name))) +
+    geom_hline(yintercept = 37, color="darkblue", linetype = "dashed") +
+    geom_point(color="darkslategray") +
+    theme_bw() +
+    scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, max_y), expand = c(0, 0)) +
+    labs(title=title, x="Illumina depth", y="Errors")
+  return(p)
+}
+
+plot_full_range("pypolca_errors", "pypolca (defaults)")
+plot_full_range("hypo_errors", "HyPo")
+plot_full_range("fmlrc2_errors", "FMLRC2")
+plot_full_range("nextpolish_errors", "NextPolish")
+
+plot_full_range("polypolish_pypolca_errors", "Polypolish (defaults) + pypolca (defaults)")
+plot_full_range("polypolish_careful_pypolca_errors", "Polypolish --careful + pypolca (defaults)")
+plot_full_range("pypolca_polypolish_errors", "pypolca (defaults) + Polypolish (defaults)")
+plot_full_range("pypolca_polypolish_careful_errors", "pypolca (defaults) + Polypolish --careful")
+```
+
+For each individual polisher, count how many times it made an input assembly better/worse and draw a stacked-bar plot:
+```{r label, options}
+count_results <- function(tool_name, data) {
+  tibble(
+    Tool = tool_name,
+    better = nrow(data %>% filter(!!sym(tool_name) < before_polish)),
+    same = nrow(data %>% filter(!!sym(tool_name) == before_polish)),
+    worse = nrow(data %>% filter(!!sym(tool_name) > before_polish))
+  )
+}
+
+made_better_or_worse <- map_dfr(c("Polypolish", "Polypolish-careful", "pypolca", "pypolca-careful", "HyPo", "FMLRC2", "NextPolish"),
+                                count_results, data = per_genome_results)
+
+made_better_or_worse <- made_better_or_worse %>%
+  pivot_longer(cols = -Tool, names_to = "Outcome", values_to = "Count") %>%
+  mutate(Outcome = factor(Outcome, levels = c("better", "same", "worse"))) %>%
+  mutate(Tool = factor(Tool, levels = c("Polypolish", "Polypolish-careful", "pypolca", "pypolca-careful", "FMLRC2", "HyPo", "NextPolish")))
+
+# Create the stacked-bar plot
+ggplot(made_better_or_worse, aes(x = Tool, y = Count, fill = Outcome)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Tools by outcome", x = NULL, y = "Genome count") +
+  theme_bw() +
+  scale_fill_manual(values = c("better" = "#74add1",
+                               "same" = "#ffffbf",
+                               "worse" = "#f46d43")) +
+  scale_y_continuous(expand = c(0, 0)) + 
+  scale_x_discrete(labels = function(x) str_replace(x, "-careful", "\n--careful"))
+```
+
+For each depth range (groups of 10x), determine which polisher/combination gave the best overall results:
+```{r depth_groups}
+best_by_depth_range <- function(total_results, min_depth, max_depth) {
+  results_by_depth <- total_results %>% filter(depth > min_depth & depth <= max_depth)
+  results_by_depth <- results_by_depth
+  best_results <- results_by_depth %>%
+    select(-depth) %>%
+    summarise_all(sum) %>%
+    pivot_longer(cols = everything(), names_to = "tool", values_to = "sum") %>%
+    filter(sum == min(sum))
+  return(best_results$tool)
+}
+
+interval <- 10
+for (min_depth in seq(0, 45, interval)) {
+  max_depth <- min_depth + interval
+  best_tools <- best_by_depth_range(total_results, min_depth, max_depth)
+  best_tools <- paste(best_tools, collapse = ", ")
+  best_tools <- str_replace_all(best_tools, "_errors", "")
+  cat(min_depth, "-", max_depth, ": ", best_tools, "\n", sep="")
+}
+```
