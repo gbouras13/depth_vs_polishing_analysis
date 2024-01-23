@@ -131,7 +131,7 @@ plot_full_range("pypolca_polypolish_careful_errors", "pypolca (defaults) + Polyp
 ```
 
 For each individual polisher, count how many times it made an input assembly better/worse and draw a stacked-bar plot:
-```{r label, options}
+```{r better_or_worse, fig.width = 8, fig.height = 4.5}
 count_results <- function(tool_name, data) {
   tibble(
     Tool = tool_name,
@@ -152,7 +152,7 @@ made_better_or_worse <- made_better_or_worse %>%
 # Create the stacked-bar plot
 ggplot(made_better_or_worse, aes(x = Tool, y = Count, fill = Outcome)) +
   geom_bar(stat = "identity") +
-  labs(title = "Tools by outcome", x = NULL, y = "Genome count") +
+  labs(title = "Polishing tools by outcome", x = NULL, y = "Genome count") +
   theme_bw() +
   scale_fill_manual(values = c("better" = "#74add1",
                                "same" = "#ffffbf",
