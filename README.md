@@ -5,7 +5,7 @@ Repository to hold miscellaneous data for the depth vs polishing paper
 Contents:
 * `ont_assemblies`: contains the ONT-only assemblies used as a starting point for polishing.
 * `reference_assemblies`: contains the polished and manually curated assemblies used as a ground truth.
-* `polishing.md`: contains the read subsampling and polishing commands.
+* `main_analysis`: contains the read subsampling and polishing commands for the main analysis of the paper.
 * `results.tsv`: tab-delimited files containing raw results.
 * `plots.Rmd`: contains the R code to generate plots.
 
