@@ -16,6 +16,7 @@ library(tidyverse)
 library(knitr)
 library(readr)
 library(dplyr)
+library(cowplot)
 
 opts_chunk$set(dpi=300, fig.path='plots/', echo=TRUE, dev=c('png','pdf'), warning=FALSE, message=FALSE)
 pdf.options(useDingbats = FALSE)
@@ -65,9 +66,8 @@ total_results <- per_genome_results %>%
 ```
 
 Plot the total errors vs Illumina depth for each polisher and polisher combination. These plots cap the y-axis at 45 and indicate peak errors with text as necessary:
-```{r plot_to_45, fig.width = 8, fig.height = 5}
+```{r single_tool_plots, fig.width = 10, fig.height = 12}
 plot_to_45 <- function(column_name, polisher_name) {
-  title <- paste("Total errors after", polisher_name)
   peak_index <- which.max(total_results[[column_name]])
   peak_errors <- total_results[[column_name]][peak_index]
   peak_depth <- total_results$depth[peak_index]
@@ -78,30 +78,35 @@ plot_to_45 <- function(column_name, polisher_name) {
     theme_bw() +
     scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, 45), expand = c(0, 0)) +
-    labs(title=title, x="Illumina depth", y="Errors")
+    labs(title=polisher_name, x="Illumina depth", y="Errors")
   if (peak_errors > 45) {
     p <- p +
-      annotate("text", label=peak_label, x=7.5, y=42.5, colour="darkred", lineheight = 0.9)
+      annotate("text", label=peak_label, x=7.5, y=41.3, colour="darkred", lineheight = 0.9)
   }
   return(p)
 }
 
-plot_to_45("polypolish_errors", "Polypolish (defaults)")
-plot_to_45("polypolish_careful_errors", "Polypolish --careful")
-plot_to_45("pypolca_errors", "pypolca (defaults)")
-plot_to_45("pypolca_careful_errors", "pypolca --careful")
-plot_to_45("hypo_errors", "HyPo")
-plot_to_45("fmlrc2_errors", "FMLRC2")
-plot_to_45("nextpolish_errors", "NextPolish")
+p1 <- plot_to_45("polypolish_errors", "Polypolish-defaults")
+p2 <- plot_to_45("pypolca_errors", "pypolca-defaults")
+p3 <- plot_to_45("polypolish_careful_errors", "Polypolish-careful")
+p4 <- plot_to_45("pypolca_careful_errors", "pypolca-careful")
+p5 <- plot_to_45("fmlrc2_errors", "FMLRC2")
+p6 <- plot_to_45("hypo_errors", "HyPo")
+p7 <- plot_to_45("nextpolish_errors", "NextPolish")
 
-plot_to_45("polypolish_pypolca_errors", "Polypolish (defaults) + pypolca (defaults)")
-plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish --careful + pypolca --careful")
-plot_to_45("polypolish_careful_pypolca_errors", "Polypolish --careful + pypolca (defaults)")
-plot_to_45("polypolish_pypolca_careful_errors", "Polypolish (defaults) + pypolca --careful")
-plot_to_45("pypolca_polypolish_errors", "pypolca (defaults) + Polypolish (defaults)")
-plot_to_45("pypolca_careful_polypolish_careful_errors", "pypolca --careful + Polypolish --careful")
-plot_to_45("pypolca_careful_polypolish_errors", "pypolca --careful + Polypolish (defaults)")
-plot_to_45("pypolca_polypolish_careful_errors", "pypolca (defaults) + Polypolish --careful")
+plot_grid(p1, p2, p3, p4, p5, p6, p7, nrow=4)
+```
+```{r polypolish_pypolca_combinations, fig.width = 10, fig.height = 12}
+p1 <- plot_to_45("polypolish_pypolca_errors", "Polypolish-defaults + pypolca-defaults")
+p2 <- plot_to_45("pypolca_polypolish_errors", "pypolca-defaults + Polypolish-defaults")
+p3 <- plot_to_45("polypolish_careful_pypolca_errors", "Polypolish-careful + pypolca-defaults")
+p4 <- plot_to_45("pypolca_polypolish_careful_errors", "pypolca-defaults + Polypolish-careful")
+p5 <- plot_to_45("polypolish_pypolca_careful_errors", "Polypolish-defaults + pypolca-careful")
+p6 <- plot_to_45("pypolca_careful_polypolish_errors", "pypolca-careful + Polypolish-defaults")
+p7 <- plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish-careful + pypolca-careful")
+p8 <- plot_to_45("pypolca_careful_polypolish_careful_errors", "pypolca-careful + Polypolish-careful")
+
+plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4)
 ```
 
 For the polishers/combinations that exceed 45 total errors, plot them with their full range:
@@ -119,15 +124,15 @@ plot_full_range <- function(column_name, polisher_name) {
   return(p)
 }
 
-plot_full_range("pypolca_errors", "pypolca (defaults)")
+plot_full_range("pypolca_errors", "pypolca-defaults")
 plot_full_range("hypo_errors", "HyPo")
 plot_full_range("fmlrc2_errors", "FMLRC2")
 plot_full_range("nextpolish_errors", "NextPolish")
 
-plot_full_range("polypolish_pypolca_errors", "Polypolish (defaults) + pypolca (defaults)")
-plot_full_range("polypolish_careful_pypolca_errors", "Polypolish --careful + pypolca (defaults)")
-plot_full_range("pypolca_polypolish_errors", "pypolca (defaults) + Polypolish (defaults)")
-plot_full_range("pypolca_polypolish_careful_errors", "pypolca (defaults) + Polypolish --careful")
+plot_full_range("polypolish_pypolca_errors", "Polypolish-defaults + pypolca-defaults")
+plot_full_range("polypolish_careful_pypolca_errors", "Polypolish --careful + pypolca-defaults")
+plot_full_range("pypolca_polypolish_errors", "pypolca-defaults + Polypolish-defaults")
+plot_full_range("pypolca_polypolish_careful_errors", "pypolca-defaults + Polypolish --careful")
 ```
 
 For each individual polisher, count how many times it made an input assembly better/worse and draw a stacked-bar plot:

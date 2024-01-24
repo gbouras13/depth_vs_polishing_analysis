@@ -275,6 +275,23 @@ for d in $(seq -f "%04.1f" 0.1 0.1 50); do
 done
 ```
 
+Pilon v1.24:
+```bash
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+    for a in "${genomes[@]}"; do
+        cd "$base_dir"/"$d"/"$a"
+        draft="$base_dir"/drafts/"$a".fasta
+
+        bwa mem -t 24 "$draft" reads_1.fastq.gz reads_2.fastq.gz | samtools sort > alignments.bam; samtools index alignments.bam
+        pilon --genome "$draft" --frags alignments.bam --output pilon > pilon.txt 2>&1
+        seqtk seq -U pilon.fasta > temp.fasta && mv temp.fasta pilon.fasta
+        rm alignments.bam alignments.bam.bai
+
+        gzip pilon.fasta
+    done
+done
+```
+
 
 
 ## Run polisher combinations

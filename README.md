@@ -5,10 +5,10 @@ Repository to hold miscellaneous data for the depth vs polishing paper
 Contents:
 * `ont_assemblies`: contains the ONT-only assemblies used as a starting point for polishing.
 * `reference_assemblies`: contains the polished and manually curated assemblies used as a ground truth.
-* `main_analysis`: contains the read subsampling and polishing commands for the main analysis of the paper.
+* `main_analysis`: contains the read subsampling, polishing and plotting commands for the main analysis of the paper.
 * `errors_in_repeats`: contains the details of the errors-in-repeats analysis shown in Figure SX.
-* `results.tsv`: tab-delimited file containing raw results.
-* `plots.Rmd`: contains the R code to generate plots.
+* `supp_figures`: contains the paper's supplementary figures.
+
 
 ONT and Illumina reads are not included in this repo due to size, but they can be found on SRA:
 
