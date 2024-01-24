@@ -383,6 +383,7 @@ for d in $(seq -f "%04.1f" 0.1 0.1 50); do
         if [[ -f "hypo.fasta.gz" && ! -f "hypo.errors" ]]; then compare_assemblies.py --aligner edlib "$ref" hypo.fasta.gz > hypo.errors &; fi
         if [[ -f "fmlrc2.fasta.gz" && ! -f "fmlrc2.errors" ]]; then compare_assemblies.py --aligner edlib "$ref" fmlrc2.fasta.gz > fmlrc2.errors &; fi
         if [[ -f "nextpolish.fasta.gz" && ! -f "nextpolish.errors" ]]; then compare_assemblies.py --aligner edlib "$ref" nextpolish.fasta.gz > nextpolish.errors &; fi
+        if [[ -f "pilon.fasta.gz" && ! -f "pilon.errors" ]]; then compare_assemblies.py --aligner edlib "$ref" pilon.fasta.gz > pilon.errors &; fi
         if [[ -f "polypolish__pypolca.fasta.gz" && ! -f "polypolish__pypolca.errors" ]]; then compare_assemblies.py --aligner edlib "$ref" polypolish__pypolca.fasta.gz > polypolish__pypolca.errors &; fi
         if [[ -f "polypolish-careful__pypolca-careful.fasta.gz" && ! -f "polypolish-careful__pypolca-careful.errors" ]]; then compare_assemblies.py --aligner edlib "$ref" polypolish-careful__pypolca-careful.fasta.gz > polypolish-careful__pypolca-careful.errors &; fi
         if [[ -f "polypolish-careful__pypolca.fasta.gz" && ! -f "polypolish-careful__pypolca.errors" ]]; then compare_assemblies.py --aligner edlib "$ref" polypolish-careful__pypolca.fasta.gz > polypolish-careful__pypolca.errors &; fi
@@ -410,6 +411,7 @@ for d in $(seq -f "%04.1f" 0.1 0.1 50); do
         if [[ -f "hypo.errors" ]]; then printf "$a\t$d\tHyPo\t"$(cat hypo.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
         if [[ -f "fmlrc2.errors" ]]; then printf "$a\t$d\tFMLRC2\t"$(cat fmlrc2.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
         if [[ -f "nextpolish.errors" ]]; then printf "$a\t$d\tNextPolish\t"$(cat nextpolish.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
+        if [[ -f "pilon.errors" ]]; then printf "$a\t$d\tPilon\t"$(cat pilon.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
         if [[ -f "polypolish__pypolca.errors" ]]; then printf "$a\t$d\tPolypolish+pypolca\t"$(cat polypolish__pypolca.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
         if [[ -f "polypolish-careful__pypolca-careful.errors" ]]; then printf "$a\t$d\tPolypolish-careful+pypolca-careful\t"$(cat polypolish-careful__pypolca-careful.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
         if [[ -f "polypolish-careful__pypolca.errors" ]]; then printf "$a\t$d\tPolypolish-careful+pypolca\t"$(cat polypolish-careful__pypolca.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
