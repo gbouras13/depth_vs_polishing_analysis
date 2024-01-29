@@ -68,74 +68,85 @@ total_results <- per_genome_results %>%
 
 Plot the total errors vs Illumina depth for each polisher and polisher combination. These plots cap the y-axis at 45 and indicate peak errors with text as necessary:
 ```{r single_tool_plots, fig.width = 10, fig.height = 12}
-plot_to_45 <- function(column_name, polisher_name) {
+plot_to_45 <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE) {
   peak_index <- which.max(total_results[[column_name]])
   peak_errors <- total_results[[column_name]][peak_index]
   peak_depth <- total_results$depth[peak_index]
   peak_label = paste("peak:\n", peak_errors, " errors", sep="")
   p <- ggplot(total_results, aes(x=depth, y=!!sym(column_name))) +
-    geom_hline(yintercept = 37, color="darkblue", linetype = "dashed") +
-    geom_point(color="darkslategray") + 
+    geom_hline(yintercept = 37, color="#004488", linetype = "dashed") +
+    geom_point(color="#662929", size=1.25) + 
     theme_bw() +
     scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, 45), expand = c(0, 0)) +
     labs(title=polisher_name, x="Illumina depth", y="Errors")
   if (peak_errors > 45) {
-    p <- p +
-      annotate("text", label=peak_label, x=7.5, y=41.3, colour="darkred", lineheight = 0.9)
+    p <- p + annotate("text", label=peak_label, x=7.5, y=41.3, colour="#662929", lineheight = 0.9)
+  }
+  if (no_x) {
+    p <- p + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+  }
+  if (no_y) {
+    p <- p + theme(axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
   }
   return(p)
 }
 
-p1 <- plot_to_45("polypolish_errors", "Polypolish-defaults")
-p2 <- plot_to_45("pypolca_errors", "pypolca-defaults")
-p3 <- plot_to_45("polypolish_careful_errors", "Polypolish-careful")
-p4 <- plot_to_45("pypolca_careful_errors", "pypolca-careful")
-p5 <- plot_to_45("fmlrc2_errors", "FMLRC2")
-p6 <- plot_to_45("hypo_errors", "HyPo")
-p7 <- plot_to_45("nextpolish_errors", "NextPolish")
-p8 <- plot_to_45("pilon_errors", "Pilon")
+p1 <- plot_to_45("polypolish_errors", "Polypolish-defaults", TRUE, FALSE)
+p2 <- plot_to_45("pypolca_errors", "pypolca-defaults", TRUE, TRUE)
+p3 <- plot_to_45("polypolish_careful_errors", "Polypolish-careful", TRUE, FALSE)
+p4 <- plot_to_45("pypolca_careful_errors", "pypolca-careful", TRUE, TRUE)
+p5 <- plot_to_45("fmlrc2_errors", "FMLRC2", TRUE, FALSE)
+p6 <- plot_to_45("hypo_errors", "HyPo", TRUE, TRUE)
+p7 <- plot_to_45("nextpolish_errors", "NextPolish", FALSE, FALSE)
+p8 <- plot_to_45("pilon_errors", "Pilon", FALSE, TRUE)
 
-plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4)
+plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 ```
 ```{r polypolish_pypolca_combinations, fig.width = 10, fig.height = 12}
-p1 <- plot_to_45("polypolish_pypolca_errors", "Polypolish-defaults + pypolca-defaults")
-p2 <- plot_to_45("pypolca_polypolish_errors", "pypolca-defaults + Polypolish-defaults")
-p3 <- plot_to_45("polypolish_careful_pypolca_errors", "Polypolish-careful + pypolca-defaults")
-p4 <- plot_to_45("pypolca_polypolish_careful_errors", "pypolca-defaults + Polypolish-careful")
-p5 <- plot_to_45("polypolish_pypolca_careful_errors", "Polypolish-defaults + pypolca-careful")
-p6 <- plot_to_45("pypolca_careful_polypolish_errors", "pypolca-careful + Polypolish-defaults")
-p7 <- plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish-careful + pypolca-careful")
-p8 <- plot_to_45("pypolca_careful_polypolish_careful_errors", "pypolca-careful + Polypolish-careful")
+p1 <- plot_to_45("polypolish_pypolca_errors", "Polypolish-defaults + pypolca-defaults", TRUE, FALSE)
+p2 <- plot_to_45("pypolca_polypolish_errors", "pypolca-defaults + Polypolish-defaults", TRUE, TRUE)
+p3 <- plot_to_45("polypolish_careful_pypolca_errors", "Polypolish-careful + pypolca-defaults", TRUE, FALSE)
+p4 <- plot_to_45("pypolca_polypolish_careful_errors", "pypolca-defaults + Polypolish-careful", TRUE, TRUE)
+p5 <- plot_to_45("polypolish_pypolca_careful_errors", "Polypolish-defaults + pypolca-careful", TRUE, FALSE)
+p6 <- plot_to_45("pypolca_careful_polypolish_errors", "pypolca-careful + Polypolish-defaults", TRUE, TRUE)
+p7 <- plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish-careful + pypolca-careful", FALSE, FALSE)
+p8 <- plot_to_45("pypolca_careful_polypolish_careful_errors", "pypolca-careful + Polypolish-careful", FALSE, TRUE)
 
-plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4)
+plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 ```
 
 For the polishers/combinations that exceed 45 total errors, plot them with their full range:
-```{r plot_full_range, fig.width = 8, fig.height = 5}
-plot_full_range <- function(column_name, polisher_name) {
-  title <- paste("Total errors after", polisher_name)
+```{r plot_full_range, fig.width = 15, fig.height = 9}
+plot_full_range <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE) {
   max_y <- max(total_results[[column_name]], na.rm = TRUE) * 1.05
   p <- ggplot(total_results, aes(x=depth, y=!!sym(column_name))) +
-    geom_hline(yintercept = 37, color="darkblue", linetype = "dashed") +
-    geom_point(color="darkslategray") +
+    geom_hline(yintercept = 37, color="#004488", linetype = "dashed") +
+    geom_point(color="#662929", size=1.25) + 
     theme_bw() +
     scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, max_y), expand = c(0, 0)) +
-    labs(title=title, x="Illumina depth", y="Errors")
+    labs(title=polisher_name, x="Illumina depth", y="Errors")
+  if (no_x) {
+    p <- p + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+  }
+  if (no_y) {
+    p <- p + theme(axis.title.y=element_blank())
+  }
   return(p)
 }
 
-plot_full_range("pypolca_errors", "pypolca-defaults")
-plot_full_range("hypo_errors", "HyPo")
-plot_full_range("fmlrc2_errors", "FMLRC2")
-plot_full_range("nextpolish_errors", "NextPolish")
-plot_full_range("pilon_errors", "Pilon")
+p1 <- plot_full_range("pypolca_errors", "pypolca-defaults", TRUE, FALSE)
+p2 <- plot_full_range("fmlrc2_errors", "FMLRC2", TRUE, TRUE)
+p3 <- plot_full_range("hypo_errors", "HyPo", TRUE, TRUE)
+p4 <- plot_full_range("nextpolish_errors", "NextPolish", TRUE, FALSE)
+p5 <- plot_full_range("pilon_errors", "Pilon", TRUE, TRUE)
+p6 <- plot_full_range("polypolish_pypolca_errors", "Polypolish-defaults + pypolca-defaults", TRUE, TRUE)
+p7 <- plot_full_range("polypolish_careful_pypolca_errors", "Polypolish-careful + pypolca-defaults", FALSE, FALSE)
+p8 <- plot_full_range("pypolca_polypolish_errors", "pypolca-defaults + Polypolish-defaults", FALSE, TRUE)
+p9 <- plot_full_range("pypolca_polypolish_careful_errors", "pypolca-defaults + Polypolish-careful", FALSE, TRUE)
 
-plot_full_range("polypolish_pypolca_errors", "Polypolish-defaults + pypolca-defaults")
-plot_full_range("polypolish_careful_pypolca_errors", "Polypolish --careful + pypolca-defaults")
-plot_full_range("pypolca_polypolish_errors", "pypolca-defaults + Polypolish-defaults")
-plot_full_range("pypolca_polypolish_careful_errors", "pypolca-defaults + Polypolish --careful")
+plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, p9, nrow=3, align = 'hv')
 ```
 
 For each individual polisher, count how many times it made an input assembly better/worse and draw a stacked-bar plot:
@@ -160,8 +171,8 @@ made_better_or_worse <- made_better_or_worse %>%
 # Create the stacked-bar plot
 ggplot(made_better_or_worse, aes(x = Tool, y = Count, fill = Outcome)) +
   geom_bar(stat = "identity") +
-  labs(title = "Polishing tools by outcome", x = NULL, y = "Genome count") +
-  theme_bw() +
+  labs(title = "Per-genome polishing result", x = NULL, y = "Genome count") +
+  theme_bw() + theme(legend.title=element_blank()) +
   scale_fill_manual(values = c("better" = "#74add1",
                                "same" = "#ffffbf",
                                "worse" = "#f46d43")) +
