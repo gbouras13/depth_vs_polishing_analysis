@@ -156,19 +156,27 @@ python "$nextpolish_dir"/lib/nextpolish1.py -g nextpolish_temp.fasta -t 2 -p 24 
 rm sgs.sort.bam* nextpolish_temp.fasta*
 ```
 
+Pilon v1.24:
+```bash
+bwa mem -t 24 "$draft" reads_1.fastq.gz reads_2.fastq.gz | samtools sort > alignments.bam; samtools index alignments.bam
+pilon --genome "$draft" --frags alignments.bam --output pilon
+seqtk seq -U pilon.fasta > temp.fasta && mv temp.fasta pilon.fasta
+rm alignments.bam alignments.bam.bai
+```
+
 
 
 ## Assess results
 
 ```bash
-for p in polypolish polypolish-careful pypolca pypolca-careful fmlrc2 hypo nextpolish; do
+for p in polypolish polypolish-careful pypolca pypolca-careful fmlrc2 hypo nextpolish pilon; do
     compare_assemblies.py --aligner edlib "$ref" "$p".fasta > "$p".errors
 done
 ```
 
 ```bash
 printf "polishing_method\tremaining_errors\n" > results.tsv
-for p in polypolish polypolish-careful pypolca pypolca-careful fmlrc2 hypo nextpolish; do
+for p in polypolish polypolish-careful pypolca pypolca-careful fmlrc2 hypo nextpolish pilon; do
     printf "$p\t"$(cat "$p".errors | grep -o "*" | wc -l)"\n" >> results.tsv
 done
 ```
@@ -182,4 +190,5 @@ pypolca-careful     33
 fmlrc2               0
 hypo                35
 nextpolish          30
+pilon               32
 ```
