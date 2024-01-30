@@ -7,7 +7,9 @@ Contents:
 * `reference_assemblies`: contains the polished and manually curated assemblies used as a ground truth.
 * `main_analysis`: contains the read subsampling, polishing and plotting commands for the main analysis of the paper.
 * `errors_in_repeats`: contains the details of the errors-in-repeats analysis shown in Figure SX.
+* `long_homopolymer`: contains the details of the long-homopolymer analysis shown in Figure SX.
 * `supp_figures`: contains the paper's supplementary figures.
+* `supp_tables.xlsx`: contains the paper's supplementary tables.
 
 
 ONT and Illumina reads are not included in this repo due to size, but they can be found on SRA:
