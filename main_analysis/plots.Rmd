@@ -166,7 +166,7 @@ made_better_or_worse <- map_dfr(c("Polypolish", "Polypolish-careful", "pypolca",
 made_better_or_worse <- made_better_or_worse %>%
   pivot_longer(cols = -Tool, names_to = "Outcome", values_to = "Count") %>%
   mutate(Outcome = factor(Outcome, levels = c("better", "same", "worse"))) %>%
-  mutate(Tool = factor(Tool, levels = c("Polypolish", "Polypolish-careful", "pypolca", "pypolca-careful", "FMLRC2", "HyPo", "NextPolish", "Pilon")))
+  mutate(Tool = factor(Tool, levels = c("pypolca", "pypolca-careful", "Polypolish", "Polypolish-careful", "FMLRC2", "HyPo", "NextPolish", "Pilon")))
 
 # Create the stacked-bar plot
 ggplot(made_better_or_worse, aes(x = Tool, y = Count, fill = Outcome)) +
@@ -177,7 +177,7 @@ ggplot(made_better_or_worse, aes(x = Tool, y = Count, fill = Outcome)) +
                                "same" = "#ffffbf",
                                "worse" = "#f46d43")) +
   scale_y_continuous(expand = c(0, 0)) + 
-  scale_x_discrete(labels = c("Polypolish-\ndefaults", "Polypolish-\ncareful", "pypolca-\ndefaults", "pypolca\n-careful", "FMLRC2", "HyPo", "NextPolish", "Pilon"))
+  scale_x_discrete(labels = c("pypolca-\ndefaults", "pypolca\n-careful", "Polypolish-\ndefaults", "Polypolish-\ncareful", "FMLRC2", "HyPo", "NextPolish", "Pilon"))
 ```
 
 For each depth range (groups of 10x), determine which polisher/combination gave the best overall results:
