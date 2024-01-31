@@ -1,0 +1,74 @@
+---
+title: "Low-depth Illumina polishing - long homopolymer"
+date: "2024-01-31"
+author: "Ryan Wick"
+output:
+  html_document:
+    pandoc_args: ["+RTS", "-K64m", "-RTS", "--self-contained",]
+    df_print: paged
+    keep_md: false
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+```{r collapse=TRUE}
+library(tidyverse)
+library(knitr)
+library(readr)
+library(dplyr)
+library(cowplot)
+
+opts_chunk$set(dpi=300, fig.path='plots/', echo=TRUE, dev=c('png','pdf'), warning=FALSE, message=FALSE)
+pdf.options(useDingbats = FALSE)
+```
+
+
+```{r load_data}
+homopolymer_counts <- read_delim("homopolymer_counts.tsv", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
+
+illumina_counts <- homopolymer_counts %>% filter(platform == "illumina") %>% select(-platform)
+ont_counts <- homopolymer_counts %>% filter(platform == "ont") %>% select(-platform)
+```
+
+```{r homopolymers_in_reads, fig.width = 5, fig.height = 4}
+p1 <- ggplot(illumina_counts, aes(x=len, y=count, fill = base)) +
+  geom_bar(stat = "identity") +
+  geom_vline(xintercept = 21, linetype = "dashed") +
+  labs(title=NULL, x="homopolymer length", y="Illumina read count") +
+  theme_bw() + theme(legend.title=element_blank()) +
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 16)) +
+  scale_x_continuous(minor_breaks = seq(0, 50, 1), expand = c(0, 0), limits = c(9.4, 30.6))
+
+
+p2 <- ggplot(ont_counts, aes(x=len, y=count, fill = base)) +
+  geom_bar(stat = "identity") +
+  geom_vline(xintercept = 21, linetype = "dashed") +
+  labs(title=NULL, x="homopolymer length", y="ONT read count") +
+  theme_bw() + theme(legend.title=element_blank()) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 600), breaks = seq(0, 600, 200)) +
+  scale_x_continuous(minor_breaks = seq(0, 50, 1), expand = c(0, 0), limits = c(9.4, 30.6))
+
+
+plot_grid(p1, p2, nrow=2, align = 'hv')
+```
+
+
+```{r fixed_counts, fig.width = 7, fig.height = 3}
+fixed_counts <- data.frame(polisher=c("pypolca-defaults", "pypolca-careful", "Polypolish-defaults", "Polypolish-careful", "FMLRC2", "HyPo", "NextPolish", "Pilon"),
+                          correct=c(35, 2, 0, 0, 0, 19, 159, 3))
+fixed_counts$incorrect <- 500 - fixed_counts$correct
+
+fixed_counts %>% pivot_longer(!polisher, names_to = "result", values_to = "count") -> fixed_counts
+fixed_counts$result <- factor(fixed_counts$result, levels = c("incorrect", "correct"))
+fixed_counts$polisher <- factor(fixed_counts$polisher, levels = c("pypolca-defaults", "pypolca-careful", "Polypolish-defaults", "Polypolish-careful", "FMLRC2", "HyPo", "NextPolish", "Pilon"))
+
+ggplot(fixed_counts, aes(x=polisher, y=count, fill=result)) +
+  geom_bar(stat="identity") +
+  theme_bw() + theme(legend.title=element_blank()) +
+  scale_fill_manual(values = c("correct" = "#1f78b4",
+                               "incorrect" = "#fc8d62")) +
+  scale_y_continuous(limits = c(0, 500), expand = c(0, 0), minor_breaks=NULL) +
+  scale_x_discrete(labels = c("pypolca-\ndefaults", "pypolca\n-careful", "Polypolish-\ndefaults", "Polypolish-\ncareful", "FMLRC2", "HyPo", "NextPolish", "Pilon")) +
+  labs(title=NULL, x=NULL, y="assembly count")
+```
