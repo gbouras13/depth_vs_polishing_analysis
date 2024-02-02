@@ -25,3 +25,17 @@ ONT and Illumina reads are not included in this repo due to size, but they can b
 | _Salmonella enterica_ (ATCC-10708)      | [SRR27638402](https://www.ncbi.nlm.nih.gov/sra/?term=SRR27638402) | [SRR26899135](https://www.ncbi.nlm.nih.gov/sra/?term=SRR26899135) |
 | _Vibrio cholerae_ (ATCC-14035)          | [SRR27638401](https://www.ncbi.nlm.nih.gov/sra/?term=SRR27638401) | [SRR26899095](https://www.ncbi.nlm.nih.gov/sra/?term=SRR26899095) |
 | _Vibrio parahaemolyticus_ (ATCC-17802)  | [SRR27638400](https://www.ncbi.nlm.nih.gov/sra/?term=SRR27638400) | [SRR26899141](https://www.ncbi.nlm.nih.gov/sra/?term=SRR26899141) |
+
+These are easily downloaded using the [`fastq-dl`](https://github.com/rpetit3/fastq-dl) program e.g.
+
+```
+fastq-dl --accession SRR27638397
+fastq-dl --accession SRR27638396
+fastq-dl --accession SRR27638398
+fastq-dl --accession SRR27638399
+fastq-dl --accession SRR27638394
+fastq-dl --accession SRR27638395
+fastq-dl --accession SRR27638402
+fastq-dl --accession SRR27638401
+fastq-dl --accession SRR27638400
+```
