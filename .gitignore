@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+*.DS_Store
+*/*.DS_Store
+*/*/*.DS_Store
+*/*/*/*.DS_Store
+
+*/*.R*
+
 # Distribution / packaging
 .Python
 build/
@@ -166,3 +173,4 @@ cython_debug/
 plots/
 plots.html
 .Rhistory
+.Rproj.user

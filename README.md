@@ -29,13 +29,14 @@ ONT and Illumina reads are not included in this repo due to size, but they can b
 These are easily downloaded using the [`fastq-dl`](https://github.com/rpetit3/fastq-dl) program e.g.
 
 ```
-fastq-dl --accession SRR27638397
-fastq-dl --accession SRR27638396
-fastq-dl --accession SRR27638398
-fastq-dl --accession SRR27638399
-fastq-dl --accession SRR27638394
-fastq-dl --accession SRR27638395
-fastq-dl --accession SRR27638402
-fastq-dl --accession SRR27638401
-fastq-dl --accession SRR27638400
+CPUS=16
+fastq-dl --accession SRR27638397 --cpus $CPUS
+fastq-dl --accession SRR27638396 --cpus $CPUS
+fastq-dl --accession SRR27638398 --cpus $CPUS
+fastq-dl --accession SRR27638399 --cpus $CPUS
+fastq-dl --accession SRR27638394 --cpus $CPUS
+fastq-dl --accession SRR27638395 --cpus $CPUS
+fastq-dl --accession SRR27638402 --cpus $CPUS
+fastq-dl --accession SRR27638401 --cpus $CPUS
+fastq-dl --accession SRR27638400 --cpus $CPUS
 ```
