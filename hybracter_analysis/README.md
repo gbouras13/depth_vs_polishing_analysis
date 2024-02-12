@@ -1,22 +1,9 @@
 ## Starting files
 
-For each genome, I'm starting with the draft (ONT-only) and reference (manually curated ground truth):
-```
-references/ATCC_10708_Salmonella_enterica.fasta
-references/ATCC_14035_Vibrio_cholerae.fasta
-references/ATCC_17802_Vibrio_parahaemolyticus.fasta
-references/ATCC_19119_Listeria_ivanovii.fasta
-references/ATCC_25922_Escherichia_coli.fasta
-references/ATCC_33560_Campylobacter_jejuni.fasta
-references/ATCC_35221_Campylobacter_lari.fasta
-references/ATCC_35897_Listeria_welshimeri.fasta
-references/ATCC_BAA-679_Listeria_monocytogenes.fasta
-```
-
 * For the `hybracter` analysis, we decided to run all assemblies from scratch implementing our recommended best practices in the `main_analysis` benchmarking. These changes were implemented in `hybracter` v0.7.0.
 * This also takes into account various factors such as assembler non-determinism (most assemblers, including Flye, are [not deterministic](https://plassembler.readthedocs.io/en/latest/flye_non_determinism/) ).
 * To test out the effect of short read polishing at different depths, we pre subsampled the short reads similar to the `main_analysis`
-* We used `hybracter v0.7.0` with default settings (which will subsampling the long reads to estimated 100x coverage)
+* We used `hybracter v0.7.0` with default settings (which will subsampling the long reads to the best estimated 100x coverage read set - in practice slightly less here depending on the `-c` minimum chromosome length used)
 * We also conducted no QC prior to `hybracter`, as it is included by default.
 
 * Note for the `ATCC_10708_Salmonella_enterica`, the long read FASTQ file was enormous (15GB) so I subsampled it first
@@ -24,8 +11,10 @@ references/ATCC_BAA-679_Listeria_monocytogenes.fasta
 ```
 mv SRR27638402.fastq.gz SRR27638402_original.fastq.gz
 filtlong --target_bases 1000000000 --min_mean_q 15 --min_length 1000 SRR27638402_original.fastq.gz | pigz > SRR27638402.fastq.gz
-
 ```
+
+
+
 
 
 ## Subsample reads
@@ -125,6 +114,7 @@ done
 
 * per sample to save some space
 * One QC step before to save time 
+* Buy default, this was with `--logic last`
 
 
 ```
@@ -167,9 +157,20 @@ conda activate compare_assemblies
 
 ## Process results
 
-Assess assemblies with [`compare_assemblies.py`](https://github.com/rrwick/Perfect-bacterial-genome-tutorial/wiki/Comparing-assemblies) script:
+* Assess assemblies with [`compare_assemblies.py`](https://github.com/rrwick/Perfect-bacterial-genome-tutorial/wiki/Comparing-assemblies) script:
 
-* No `vibrio cholerae` due to structural heterogeneity
+* _Vibrio cholerae_ was excluded due to the known structural heterogeneity in assembly methods with hybracter.
+* I focused only on chromosomes
+* Therefore, I made reference chromosome assemblies in `reference_chromosome_assemblies_hybracter` - these removed the plasmids from _E coli_ and _S enterica_, as we wanted to compare the impact of polishing on the chromosome. This was due to the large number of false positive plasmid contigs generated (due to barcode bleed observed in the short read sets)
+* Additionally, I reoriented _V. parahaemolyticus_ with [Dnaapler](https://github.com/gbouras13/dnaapler) v0.7.0 so that the smaller chromosome began in a consistent fashion with a homolog of the repA gene as in hybracter to enable comparison.
+
+```
+dnaapler all -i references_assemblies/ATCC_17802_Vibrio_parahaemolyticus.fasta -o ATCC_17802_Vibrio_parahaemolyticus_dnaapler -t 8
+mv ATCC_17802_Vibrio_parahaemolyticus_dnaapler/dnaapler_reoriented.fasta    reference_chromosome_assemblies_hybracter/ATCC_17802_Vibrio_parahaemolyticus.fasta
+```
+
+* ALE often preferred worse pre-polished assemblies as best (aka `--logic best` in hybracter), so I decided to also check this with the `pypolca` output aka what you would get if you ran `-logic last`
+
 
 ```bash
 
@@ -180,7 +181,7 @@ read_dir=/home/user/Documents/hybracter_polishing_analysis/short_reads
 genomes=(
     "ATCC_10708_Salmonella_enterica"
 #    "ATCC_14035_Vibrio_cholerae"
-#    "ATCC_17802_Vibrio_parahaemolyticus"
+    "ATCC_17802_Vibrio_parahaemolyticus"
     "ATCC_19119_Listeria_ivanovii"
     "ATCC_25922_Escherichia_coli"
     "ATCC_33560_Campylobacter_jejuni"
@@ -196,12 +197,15 @@ for d in {1..50}; do
         mkdir -p "$base_dir"/compare_assemblies/"$d"/"$a"
         cd "$base_dir"/compare_assemblies/"$d"/"$a"
         ref="$base_dir"/reference_chromosome_assemblies_hybracter/"$a".fasta
-        assembly="$base_dir"/hybracter_outputs/"$a"/FINAL_OUTPUT/complete/"$d"x_chromosome.fasta
-        "$base_dir"/compare_assemblies.py --aligner edlib "$ref" $assembly > hybracter.errors 
+        best_assembly="$base_dir"/hybracter_outputs/"$a"/FINAL_OUTPUT/complete/"$d"x_chromosome.fasta
+        "$base_dir"/compare_assemblies.py --aligner edlib "$ref" $best_assembly > hybracter_best.errors 
+        last_assembly="$base_dir"/hybracter_outputs/"$a"/supplementary_results/intermediate_chromosome_assemblies/"$d"x/"$d"x_pypolca.fasta 
+        "$base_dir"/compare_assemblies.py --aligner edlib "$ref" $last_assembly > hybracter_last.errors 
     done
     wait
 done
 ```
+
 
 Produce TSV file of results:
 ```bash
@@ -214,7 +218,39 @@ for d in {1..50}; do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/compare_assemblies/"$d"/"$a"
         ref="$base_dir"/reference_chromosome_assemblies_hybracter/"$a".fasta
-        if [[ -f "hybracter.errors" ]]; then printf "$a\t$d\thybracter\t"$(cat hybracter.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
+        if [[ -f "hybracter_best.errors" ]]; then printf "$a\t$d\thybracter_best\t"$(cat hybracter_best.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
+        if [[ -f "hybracter_last.errors" ]]; then printf "$a\t$d\thybracter_last\t"$(cat hybracter_last.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
     done
 done
 ```
+
+Summary TSVs
+
+```bash
+mkdir -p hybracter_summary_tsvs
+
+genomes=(
+    "ATCC_10708_Salmonella_enterica"
+    "ATCC_14035_Vibrio_cholerae"
+    "ATCC_17802_Vibrio_parahaemolyticus"
+    "ATCC_19119_Listeria_ivanovii"
+    "ATCC_25922_Escherichia_coli"
+    "ATCC_33560_Campylobacter_jejuni"
+    "ATCC_35221_Campylobacter_lari"
+    "ATCC_35897_Listeria_welshimeri"
+    "ATCC_BAA-679_Listeria_monocytogenes"
+)
+
+
+for a in "${genomes[@]}"; do
+    base_dir=/home/user/Documents/hybracter_polishing_analysis
+
+    cp "$base_dir"/hybracter_outputs/"$a"/FINAL_OUTPUT/hybracter_summary.tsv hybracter_summary_tsvs/"$a".tsv
+
+done
+
+```
+
+
+
+
