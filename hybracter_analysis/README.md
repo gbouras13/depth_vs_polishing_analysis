@@ -14,9 +14,6 @@ filtlong --target_bases 1000000000 --min_mean_q 15 --min_length 1000 SRR27638402
 ```
 
 
-
-
-
 ## Subsample reads
 
 Taking the mean read length for each genome analysis conducted in the `main_analysis`:
@@ -231,7 +228,7 @@ mkdir -p hybracter_summary_tsvs
 
 genomes=(
     "ATCC_10708_Salmonella_enterica"
-    "ATCC_14035_Vibrio_cholerae"
+    # "ATCC_14035_Vibrio_cholerae"
     "ATCC_17802_Vibrio_parahaemolyticus"
     "ATCC_19119_Listeria_ivanovii"
     "ATCC_25922_Escherichia_coli"

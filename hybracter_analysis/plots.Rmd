@@ -1,0 +1,241 @@
+---
+title: "Low-depth Illumina polishing Hybracter"
+date: "2024-01-22"
+author: "Ryan Wick, George Bouras"
+output:
+  html_document:
+    pandoc_args: ["+RTS", "-K64m", "-RTS", "--self-contained",]
+    df_print: paged
+    keep_md: false
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+```{r collapse=TRUE}
+library(tidyverse)
+library(knitr)
+library(readr)
+library(dplyr)
+library(cowplot)
+
+plot_dir <- "plots"
+dir.create(plot_dir)
+
+opts_chunk$set(dpi=300, fig.path='plots/', echo=TRUE, dev=c('png','pdf'), warning=FALSE, message=FALSE)
+pdf.options(useDingbats = FALSE)
+```
+
+
+Load data from `results.tsv` and process it a bit. I add a column which contains the number of errors in the draft (pre-Illumina-polish) genomes.
+
+```{r load_data}
+per_genome_results <- read_delim("results.tsv", delim = "\t", 
+                                 escape_double = FALSE, 
+                                 trim_ws = TRUE)
+
+'%ni%' <- Negate('%in%')
+
+# due to non-deterministic error in assembly for Listeria 36/50
+per_genome_results <- per_genome_results %>%  filter(genome %ni% c("ATCC_35897_Listeria_welshimeri"))
+
+# 13 instances for E coli, 1 for monocytogenes
+structural_errors <-  per_genome_results %>% filter(remaining_errors > 50 )
+
+# filter structural errors out
+
+per_genome_results <- per_genome_results %>% filter(remaining_errors < 50 )
+
+```
+
+Make Hybracter Error Plots per Genome
+
+```{r per genome last plot}
+
+
+
+generate_plot <- function(genome_name, long_only_trycycler_threshold, atcc_name,
+                          italics_name
+                          ) {
+  
+  ymax <- max(per_genome_results  %>% 
+                filter(genome == genome_name) %>%  
+                pull(remaining_errors)) + 2
+  
+  p <- ggplot(per_genome_results %>% 
+                filter(polishing == "hybracter_last") %>% 
+                filter(genome == genome_name), 
+              aes(x=target_illumina_depth, y=remaining_errors ) ) +
+    geom_hline(yintercept = long_only_trycycler_threshold, 
+               color="#004488", linetype = "dashed") +
+    geom_point(color="#662929", size=1.25) + 
+    theme_bw() +
+    scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
+    labs(title= bquote(.(atcc_name) ~ italic(.(italics_name))) , x="Illumina depth", y="Errors")
+  
+  return(p)
+}
+
+
+
+
+```
+
+```{r plots}
+
+se_plot <- generate_plot("ATCC_10708_Salmonella_enterica", 3, "ATCC 10708", "Salmonella enterica")
+vp_plot <- generate_plot("ATCC_17802_Vibrio_parahaemolyticus", 2, "ATCC 17802", "Vibrio parahaemolyticus")
+li_plot <- generate_plot("ATCC_19119_Listeria_ivanovii", 5, "ATCC 19119", "Listeria ivanovii")
+ec_plot <- generate_plot("ATCC_25922_Escherichia_coli", 1, "ATCC 25922", "Escherichia coli")
+cl_plot <- generate_plot("ATCC_35221_Campylobacter_lari", 18, "ATCC 35221", "Campylobacter lari")
+cj_plot <- generate_plot("ATCC_33560_Campylobacter_jejuni", 5, "ATCC 33560", "Campylobacter jejuni")
+lm_plot <- generate_plot("ATCC_BAA-679_Listeria_monocytogenes", 0, "ATCC BAA-679", "Listeria monocytogenes")
+
+
+jpeg(file = paste(plot_dir, "SuppFig2.jpeg", sep = "/" ), units = "in", 
+     width = 9, 
+     height = 16, bg = "transparent", res = 600)
+
+
+plot_grid(se_plot, vp_plot, 
+          li_plot, ec_plot, cl_plot, cj_plot, 
+          lm_plot, nrow=4, align = 'hv')
+dev.off()
+
+
+
+```
+
+
+Make a dataframe with the error counts totaled over all 7 genomes (excluding the depths where E. coli and L. monocytogenes have problems with the automated Flye long read assemblies).
+
+```{r totals}
+total_results <- per_genome_results %>%
+  filter(polishing == "hybracter_last") %>% 
+  group_by(target_illumina_depth) %>%
+  summarise(total_hybracter_errors = sum(remaining_errors),
+            count = n()) %>% 
+  filter(count == 7)
+
+ymax <- 100
+  
+  
+  p <- ggplot(total_results, 
+              aes(x=target_illumina_depth, 
+                  y=total_hybracter_errors ) ) +
+    geom_point(color="#662929", size=1.25) + 
+    geom_hline(yintercept = 34, 
+               color="#004488", linetype = "dashed") +
+    theme_bw() +
+    scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
+    labs(title= "Total Hybracter Errors for 7 Genomes Without Assembly Heterogeneity", x="Illumina depth", y="Errors")
+
+  jpeg(file = paste(plot_dir, "SuppFig3.jpeg", sep = "/" ), units = "in", 
+     width = 9, 
+     height = 16, bg = "transparent", res = 600)
+
+  p
+  
+  dev.off()
+  
+```
+
+Look at where Hybracter Best (aka the intermediate assemblies ALE score highest) and Hybracter Last differ - Best is never better than Last, and often worse. It will be worse where ALE thinks an assembly before Pypolca polishing is better than the Pypolca polished version.
+
+
+```{r per genome comp plot}
+
+
+generate_comp_plot <- function(df,genome_name, long_only_trycycler_threshold, atcc_name,
+                          italics_name, legend_flag
+                          ) {
+  
+  df$polishing <- gsub("hybracter_last", "Last (Post-polishing)", df$polishing)
+  df$polishing <- gsub("hybracter_best", "Best (ALE)", df$polishing)
+  
+  ymax <- max(df  %>% 
+                filter(genome == genome_name) %>%  
+                pull(remaining_errors)) + 2
+  
+  p <- ggplot(df %>% 
+                filter(genome == genome_name), 
+              aes(x=target_illumina_depth, y=remaining_errors, color = polishing ) ) +
+    geom_hline(yintercept = long_only_trycycler_threshold, 
+               color="#004488", linetype = "dashed") +
+    geom_point( size=1.25) + 
+    theme_bw() +
+    scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
+    labs(title= bquote(.(atcc_name) ~ italic(.(italics_name))) , x="Illumina depth", y="Errors") + 
+          scale_color_manual(name = "Hybracter Logic Method",
+                       labels = c("Best (ALE)", 
+                                  "Last (Post-polishing)"),
+                       values = c("Best (ALE)" = "#99D6D6", 
+                                  "Last (Post-polishing)" = "#662929"))  # Adjust colors as needed
+  
+    if(legend_flag) {
+      p <- p
+    } else {
+        p <- p + guides(color = FALSE)  # Hide the color legend if legend_flag is FALSE
+    }
+
+  
+  return(p)
+}
+
+
+
+
+```
+
+```{r plots}
+
+se_plot_w_legend <- generate_comp_plot(per_genome_results, "ATCC_10708_Salmonella_enterica", 3, "ATCC 10708", "Salmonella enterica", TRUE) 
+
+se_plot_w_legend <- se_plot_w_legend + 
+  geom_point( size=3) +
+          scale_fill_manual(name = "Hybracter Logic Method",
+                       labels = c("Best (ALE)", 
+                                  "Last (Post-polishing)"),
+                       values = c("Best (ALE)" = "#99D6D6", 
+                                  "Last (Post-polishing)" = "#662929"))+
+  theme(
+    legend.title = element_text(size = 22),  # Adjust title size
+    legend.text = element_text(size = 16)     # Adjust label size
+  ) 
+
+se_plot <- generate_comp_plot(per_genome_results, "ATCC_10708_Salmonella_enterica", 3, "ATCC 10708", "Salmonella enterica", FALSE)
+
+vp_plot <- generate_comp_plot(per_genome_results, "ATCC_17802_Vibrio_parahaemolyticus", 2, "ATCC 17802", "Vibrio parahaemolyticus", FALSE)
+li_plot <- generate_comp_plot(per_genome_results, "ATCC_19119_Listeria_ivanovii", 5, "ATCC 19119", "Listeria ivanovii", FALSE)
+ec_plot <- generate_comp_plot(per_genome_results, "ATCC_25922_Escherichia_coli", 1, "ATCC 25922", "Escherichia coli", FALSE)
+cl_plot <- generate_comp_plot(per_genome_results, "ATCC_35221_Campylobacter_lari", 18, "ATCC 35221", "Campylobacter lari", FALSE)
+cj_plot <- generate_comp_plot(per_genome_results, "ATCC_33560_Campylobacter_jejuni", 5, "ATCC 33560", "Campylobacter jejuni", FALSE)
+lm_plot <- generate_comp_plot(per_genome_results, "ATCC_BAA-679_Listeria_monocytogenes", 0, "ATCC BAA-679", "Listeria monocytogenes", FALSE)
+
+
+legend_plot <- cowplot::get_legend(se_plot_w_legend)
+
+grid <- plot_grid(
+  se_plot, vp_plot, 
+  li_plot, ec_plot, 
+  cl_plot, cj_plot, 
+  lm_plot, legend_plot, 
+  nrow = 4, align = 'hv'
+)
+
+
+
+jpeg(file = paste(plot_dir, "SuppFig4.jpeg", sep = "/" ), units = "in", 
+     width = 9, 
+     height = 16, bg = "transparent", res = 600)
+
+grid
+
+dev.off()
+
+
+
+```
+

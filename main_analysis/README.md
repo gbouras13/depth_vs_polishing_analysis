@@ -24,7 +24,6 @@ references/ATCC_BAA-679_Listeria_monocytogenes.fasta
 ```
 
 
-
 ## Set variables
 
 The directories in `base_dir`, `read_dir` and `nextpolish_dir` are for my system - change as appropriate for your system. Genome sizes were gotten from the ground truth reference genomes.
@@ -251,7 +250,7 @@ for d in $(seq -f "%04.1f" 0.1 0.1 50); do
 done
 ```
 
-NextPolish v1.4.1 (one round of their [user-defined short-read pipeline](https://nextpolish.readthedocs.io/en/latest/TUTORIAL.html)):
+NextPolish v1.4.1 (1](https://nextpolish.readthedocs.io/en/latest/TUTORIAL.html)):
 ```bash
 conda activate nextdenovo
 

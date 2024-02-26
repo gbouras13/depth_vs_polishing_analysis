@@ -18,6 +18,9 @@ library(readr)
 library(dplyr)
 library(cowplot)
 
+plot_dir <- "plots"
+dir.create(plot_dir)
+
 opts_chunk$set(dpi=300, fig.path='plots/', echo=TRUE, dev=c('png','pdf'), warning=FALSE, message=FALSE)
 pdf.options(useDingbats = FALSE)
 ```
@@ -92,31 +95,47 @@ plot_to_45 <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE) {
   return(p)
 }
 
-p1 <- plot_to_45("polypolish_errors", "Polypolish-defaults", TRUE, FALSE)
-p2 <- plot_to_45("pypolca_errors", "pypolca-defaults", TRUE, TRUE)
-p3 <- plot_to_45("polypolish_careful_errors", "Polypolish-careful", TRUE, FALSE)
-p4 <- plot_to_45("pypolca_careful_errors", "pypolca-careful", TRUE, TRUE)
-p5 <- plot_to_45("fmlrc2_errors", "FMLRC2", TRUE, FALSE)
-p6 <- plot_to_45("hypo_errors", "HyPo", TRUE, TRUE)
+p1 <- plot_to_45("polypolish_errors", "Polypolish-default", FALSE, FALSE)
+p2 <- plot_to_45("pypolca_errors", "pypolca-default", FALSE, TRUE)
+p3 <- plot_to_45("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE)
+p4 <- plot_to_45("pypolca_careful_errors", "pypolca-careful", FALSE, TRUE)
+p5 <- plot_to_45("fmlrc2_errors", "FMLRC2", FALSE, FALSE)
+p6 <- plot_to_45("hypo_errors", "HyPo", FALSE, TRUE)
 p7 <- plot_to_45("nextpolish_errors", "NextPolish", FALSE, FALSE)
 p8 <- plot_to_45("pilon_errors", "Pilon", FALSE, TRUE)
 
+
+
+
+jpeg(file = paste(plot_dir, "Figure1.jpeg", sep = "/" ), units = "in", 
+     width = 9, 
+     height = 16, bg = "transparent", res = 600)
+
+
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
+dev.off()
 ```
+
 ```{r polypolish_pypolca_combinations, fig.width = 10, fig.height = 12}
-p1 <- plot_to_45("polypolish_pypolca_errors", "Polypolish-defaults + pypolca-defaults", TRUE, FALSE)
-p2 <- plot_to_45("pypolca_polypolish_errors", "pypolca-defaults + Polypolish-defaults", TRUE, TRUE)
-p3 <- plot_to_45("polypolish_careful_pypolca_errors", "Polypolish-careful + pypolca-defaults", TRUE, FALSE)
-p4 <- plot_to_45("pypolca_polypolish_careful_errors", "pypolca-defaults + Polypolish-careful", TRUE, TRUE)
-p5 <- plot_to_45("polypolish_pypolca_careful_errors", "Polypolish-defaults + pypolca-careful", TRUE, FALSE)
-p6 <- plot_to_45("pypolca_careful_polypolish_errors", "pypolca-careful + Polypolish-defaults", TRUE, TRUE)
+p1 <- plot_to_45("polypolish_pypolca_errors", "Polypolish-default + pypolca-default", FALSE, FALSE)
+p2 <- plot_to_45("pypolca_polypolish_errors", "pypolca-default + Polypolish-default", FALSE, TRUE)
+p3 <- plot_to_45("polypolish_careful_pypolca_errors", "Polypolish-careful + pypolca-default", TRUE, FALSE)
+p4 <- plot_to_45("pypolca_polypolish_careful_errors", "pypolca-default + Polypolish-careful", TRUE, TRUE)
+p5 <- plot_to_45("polypolish_pypolca_careful_errors", "Polypolish-default + pypolca-careful", FALSE, FALSE)
+p6 <- plot_to_45("pypolca_careful_polypolish_errors", "pypolca-careful + Polypolish-default", FALSE, TRUE)
 p7 <- plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish-careful + pypolca-careful", FALSE, FALSE)
 p8 <- plot_to_45("pypolca_careful_polypolish_careful_errors", "pypolca-careful + Polypolish-careful", FALSE, TRUE)
 
+jpeg(file = paste(plot_dir, "Figure2.jpeg", sep = "/" ), units = "in", 
+     width = 9, 
+     height = 16, bg = "transparent", res = 600)
+
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
+dev.off()
 ```
 
-For the polishers/combinations that exceed 45 total errors, plot them with their full range:
+Plot the single polishers with their full range:
+
 ```{r plot_full_range, fig.width = 15, fig.height = 9}
 plot_full_range <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE) {
   max_y <- max(total_results[[column_name]], na.rm = TRUE) * 1.05
@@ -136,17 +155,25 @@ plot_full_range <- function(column_name, polisher_name, no_x = FALSE, no_y = FAL
   return(p)
 }
 
-p1 <- plot_full_range("pypolca_errors", "pypolca-defaults", TRUE, FALSE)
-p2 <- plot_full_range("fmlrc2_errors", "FMLRC2", TRUE, TRUE)
-p3 <- plot_full_range("hypo_errors", "HyPo", TRUE, TRUE)
-p4 <- plot_full_range("nextpolish_errors", "NextPolish", TRUE, FALSE)
-p5 <- plot_full_range("pilon_errors", "Pilon", TRUE, TRUE)
-p6 <- plot_full_range("polypolish_pypolca_errors", "Polypolish-defaults + pypolca-defaults", TRUE, TRUE)
-p7 <- plot_full_range("polypolish_careful_pypolca_errors", "Polypolish-careful + pypolca-defaults", FALSE, FALSE)
-p8 <- plot_full_range("pypolca_polypolish_errors", "pypolca-defaults + Polypolish-defaults", FALSE, TRUE)
-p9 <- plot_full_range("pypolca_polypolish_careful_errors", "pypolca-defaults + Polypolish-careful", FALSE, TRUE)
+p1 <- plot_full_range("polypolish_errors", "Polypolish-default", FALSE, FALSE)
+p2 <- plot_full_range("pypolca_errors", "pypolca-default", FALSE, TRUE)
+p3 <- plot_full_range("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE)
+p4 <- plot_full_range("pypolca_careful_errors", "pypolca-careful", FALSE, TRUE)
+p5 <- plot_full_range("fmlrc2_errors", "FMLRC2", FALSE, FALSE)
+p6 <- plot_full_range("hypo_errors", "HyPo", FALSE, TRUE)
+p7 <- plot_full_range("nextpolish_errors", "NextPolish", FALSE, FALSE)
+p8 <- plot_full_range("pilon_errors", "Pilon", FALSE, TRUE)
 
-plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, p9, nrow=3, align = 'hv')
+
+
+jpeg(file = paste(plot_dir, "Supp_Figure1.jpeg", sep = "/" ), units = "in", 
+     width = 9, 
+     height = 16, bg = "transparent", res = 600)
+
+
+plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
+dev.off()
+
 ```
 
 For each individual polisher, count how many times it made an input assembly better/worse and draw a stacked-bar plot:
@@ -177,7 +204,7 @@ ggplot(made_better_or_worse, aes(x = Tool, y = Count, fill = Outcome)) +
                                "same" = "#ffffbf",
                                "worse" = "#f46d43")) +
   scale_y_continuous(expand = c(0, 0)) + 
-  scale_x_discrete(labels = c("pypolca-\ndefaults", "pypolca\n-careful", "Polypolish-\ndefaults", "Polypolish-\ncareful", "FMLRC2", "HyPo", "NextPolish", "Pilon"))
+  scale_x_discrete(labels = c("pypolca-\ndefault", "pypolca\n-careful", "Polypolish-\ndefault", "Polypolish-\ncareful", "FMLRC2", "HyPo", "NextPolish", "Pilon"))
 ```
 
 For each depth range (groups of 10x), determine which polisher/combination gave the best overall results:
@@ -201,4 +228,143 @@ for (min_depth in seq(0, 45, interval)) {
   best_tools <- str_replace_all(best_tools, "_errors", "")
   cat(min_depth, "-", max_depth, ": ", best_tools, "\n", sep="")
 }
+```
+
+
+What is the lowest depth that the polishers don't introduce errors?
+
+```{r}
+
+# Function to find the first row where value is 37 or lower for a given column
+# at least 2x
+find_first_row_below_threshold <- function(data, column_name, threshold) {
+  first_row <- which(total_results[[column_name]][21:500] <= threshold)[1]  # Find the first row where value is <= threshold
+  if (is.na(first_row)) {
+    message("No rows found below threshold for column ", column_name)
+    return(NA)
+  } else {
+    first_row <- first_row + 20 # to make up for the 20 offset
+   cat("The lowest value of coverage for ", column_name ,  " where errors is equal or below", threshold, " is:", total_results$depth[first_row], "\n")
+} 
+    return(first_row)
+  }
+  
+
+# Example usage
+column_name <- "hypo_errors"  # Specify the column name
+threshold <- 37  # Specify the threshold
+
+first_row <- find_first_row_below_threshold(data, "pypolca_errors", threshold)
+first_row <- find_first_row_below_threshold(data, "fmlrc2_errors", threshold)
+first_row <- find_first_row_below_threshold(data, "hypo_errors", threshold)
+first_row <- find_first_row_below_threshold(data, "nextpolish_errors", threshold)
+first_row <- find_first_row_below_threshold(data, "pilon_errors", threshold)
+
+
+
+
+
+```
+
+
+
+```{r}
+find_last_row_above_threshold <- function(data, column_name, threshold) {
+  last_row <- max(which(total_results[[column_name]] > threshold))  # Find the last row where value is > threshold
+  if (is.na(last_row)) {
+    message("No rows found above threshold for column ", column_name)
+    return(NA)
+  } else {
+   cat("The highest value of coverage for ", column_name ,  " where errors is equal or above", threshold, " is:", total_results$depth[last_row], "\n")
+    return(last_row)
+  }
+}
+
+# Example usage
+column_name <- "hypo_errors"  # Specify the column name
+threshold <- 37  # Specify the threshold
+
+last_row <- find_last_row_above_threshold(data, "pypolca_errors", threshold)
+last_row <- find_last_row_above_threshold(data, "fmlrc2_errors", threshold)
+last_row <- find_last_row_above_threshold(data, "hypo_errors", threshold)
+last_row <- find_last_row_above_threshold(data, "nextpolish_errors", threshold)
+last_row <- find_last_row_above_threshold(data, "pilon_errors", threshold)
+```
+
+
+Get mean min max errors from 25+ for single polishers
+```{r}
+
+total_results %>%  filter(depth >= 25)
+
+
+total_results %>%  filter(depth >= 25) %>% 
+  pivot_longer(cols = before_polish:pilon_errors,
+               names_to = "polisher", values_to = "value") %>%
+  group_by(polisher) %>%
+  summarize(
+    mean_errors = mean(value, na.rm = TRUE),
+    median_errors = median(value, na.rm = TRUE),
+    sd_errors = sd(value, na.rm = TRUE),
+    min_errors = min(value, na.rm = TRUE),
+    max_errors = max(value, na.rm = TRUE),
+    improvements = sum(value < 37, na.rm = TRUE),
+    worse = sum(value > 37, na.rm = TRUE),
+    equal = sum(value == 37, na.rm = TRUE),
+  )
+
+
+```
+
+
+Get mean min max errors from 25+ for single polishers
+```{r}
+
+
+
+
+total_results %>%  filter(depth >= 25) %>% 
+  pivot_longer(cols = polypolish_pypolca_errors:pypolca_polypolish_careful_errors,
+               names_to = "polisher", values_to = "value") %>%
+  group_by(polisher) %>%
+  summarize(
+    mean_errors = mean(value, na.rm = TRUE),
+    median_errors = median(value, na.rm = TRUE),
+    sd_errors = sd(value, na.rm = TRUE),
+    min_errors = min(value, na.rm = TRUE),
+    max_errors = max(value, na.rm = TRUE),
+    improvements = sum(value < 37, na.rm = TRUE),
+    worse = sum(value > 37, na.rm = TRUE),
+    equal = sum(value == 37, na.rm = TRUE),
+  )
+
+
+
+
+```
+
+Get the means by each 5x depth bin
+
+```{r}
+
+errors_by_bin <- total_results %>%  filter(depth >= 0 ) %>% 
+  mutate(bin = cut(depth, breaks = seq(0, max(depth) + 5, by = 5), include.lowest = TRUE)) %>%
+  pivot_longer(cols = polypolish_pypolca_errors:pypolca_polypolish_careful_errors,
+               names_to = "polisher", values_to = "value") %>%
+  group_by(polisher, bin) %>%
+  summarize(
+    mean_errors = mean(value, na.rm = TRUE),
+    median_errors = median(value, na.rm = TRUE),
+    sd_errors = sd(value, na.rm = TRUE),
+    min_errors = min(value, na.rm = TRUE),
+    max_errors = max(value, na.rm = TRUE),
+    improvements = sum(value < 37, na.rm = TRUE),
+    worse = sum(value > 37, na.rm = TRUE),
+    equal = sum(value == 37, na.rm = TRUE),
+  )
+
+# keep only the 4 best with pypolca careful
+pyolca_careful <- errors_by_bin %>% filter( grepl ("pypolca_careful", polisher) )
+
+pyolca_careful %>%  view()
 ```
