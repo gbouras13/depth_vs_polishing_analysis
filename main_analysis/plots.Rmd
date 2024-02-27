@@ -107,7 +107,7 @@ p8 <- plot_to_45("pilon_errors", "Pilon", FALSE, TRUE)
 
 
 
-jpeg(file = paste(plot_dir, "Figure1.jpeg", sep = "/" ), units = "in", 
+jpeg(file = paste(plot_dir, "Figure2.jpeg", sep = "/" ), units = "in", 
      width = 9, 
      height = 16, bg = "transparent", res = 600)
 
@@ -126,7 +126,7 @@ p6 <- plot_to_45("pypolca_careful_polypolish_errors", "pypolca-careful + Polypol
 p7 <- plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish-careful + pypolca-careful", FALSE, FALSE)
 p8 <- plot_to_45("pypolca_careful_polypolish_careful_errors", "pypolca-careful + Polypolish-careful", FALSE, TRUE)
 
-jpeg(file = paste(plot_dir, "Figure2.jpeg", sep = "/" ), units = "in", 
+jpeg(file = paste(plot_dir, "Figure3.jpeg", sep = "/" ), units = "in", 
      width = 9, 
      height = 16, bg = "transparent", res = 600)
 

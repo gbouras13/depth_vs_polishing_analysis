@@ -111,13 +111,23 @@ alTrack <- AlignmentsTrack(
 plot_dir <- "Plots"
 dir.create(plot_dir )
 
+high_conf <- plotTracks(  c(sTrack,alTrack),
+             panel.only = TRUE,
+             from = 45, 
+             to = 55, 
+             chromosome = "plasmid_4", 
+             genome = "plasmid_4", 
+             # transcriptAnnotation = "transcript",
+             background.title="black",
+             col.axis="white",
+             col.title= "white")
+
 jpeg(file = paste(plot_dir,"high_conf.jpeg" , sep = "/" ),units = "in", 
      width = 6, 
      height = 5, bg = "transparent", res = 600)
 
-
-
 plotTracks(  c(sTrack,alTrack),
+             panel.only = TRUE,
              from = 45, 
              to = 55, 
              chromosome = "plasmid_4", 
@@ -172,6 +182,7 @@ jpeg(file = paste(plot_dir,"diff.jpeg" , sep = "/" ),units = "in",
 
 
 plotTracks(  c(sTrack,alTrack),
+             panel.only = TRUE,
              from = 45, 
              to = 55, 
              chromosome = "plasmid_4", 
@@ -182,3 +193,59 @@ plotTracks(  c(sTrack,alTrack),
              col.title= "white")
 
 dev.off()
+
+
+
+
+###########################
+# ratio
+####################33
+
+bam <- "ratio_alignment_sorted.bam"
+
+
+# https://github.com/ivanek/Gviz/issues/16
+alTrack <- AlignmentsTrack(
+  bam, importFunction = .import.bam.alignments.ignore.secondary,
+  genome = "plasmid_4",
+  chromosome = "plasmid_4",
+  isPaired = TRUE,
+  fill.coverage= "white",
+  col.coverage= "#091833",
+  lwd.coverage=2,
+  alpha.reads= 1,
+  alpha.mismatch=1,
+  col.reads= "#c0c2ce",
+  fill.reads= "#c0c2ce",
+  showIndels = TRUE,
+  col.deletion="#f20505",
+  col.gap="white",
+  col.insertion= "#c0c2ce",
+  lwd.deletions= 20,
+  lwd.gap= 0,
+  showMismatches= TRUE,
+  name="Ratio", 
+  type=c("coverage", "pileup"), stacking = "squish")
+
+
+
+
+jpeg(file = paste(plot_dir,"ratio" , sep = "/" ),units = "in", 
+     width = 6, 
+     height = 5, bg = "transparent", res = 600)
+
+
+
+plotTracks(  c(sTrack,alTrack),
+             panel.only = TRUE,
+             from = 45, 
+             to = 55, 
+             chromosome = "plasmid_4", 
+             genome = "plasmid_4", 
+             # transcriptAnnotation = "transcript",
+             background.title="black",
+             col.axis="white",
+             col.title= "white")
+
+dev.off()
+
