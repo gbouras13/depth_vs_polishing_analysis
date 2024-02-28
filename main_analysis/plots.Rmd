@@ -48,43 +48,83 @@ per_genome_results <- per_genome_results %>%
 
 Make a dataframe with the error counts totalled over all nine genomes:
 ```{r totals}
-total_results <- per_genome_results %>%
+introduced <- per_genome_results
+introduced$Polypolish_introduced <- ifelse(introduced$Polypolish - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`Polypolish-careful_introduced` <- ifelse(introduced$`Polypolish-careful` - introduced$before_polish > 0, TRUE, FALSE)
+introduced$pypolca_introduced <- ifelse(introduced$pypolca - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`pypolca-careful_introduced` <- ifelse(introduced$`pypolca-careful` - introduced$before_polish > 0, TRUE, FALSE)
+introduced$HyPo_introduced <- ifelse(introduced$HyPo - introduced$before_polish > 0, TRUE, FALSE)
+introduced$FMLRC2_introduced <- ifelse(introduced$FMLRC2 - introduced$before_polish > 0, TRUE, FALSE)
+introduced$NextPolish_introduced <- ifelse(introduced$NextPolish - introduced$before_polish > 0, TRUE, FALSE)
+introduced$Pilon_introduced <- ifelse(introduced$Pilon - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`Polypolish+pypolca_introduced` <- ifelse(introduced$`Polypolish+pypolca` - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`Polypolish-careful+pypolca-careful_introduced` <- ifelse(introduced$`Polypolish-careful+pypolca-careful` - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`Polypolish-careful+pypolca_introduced` <- ifelse(introduced$`Polypolish-careful+pypolca` - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`Polypolish+pypolca-careful_introduced` <- ifelse(introduced$`Polypolish+pypolca-careful` - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`pypolca+Polypolish_introduced` <- ifelse(introduced$`pypolca+Polypolish` - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`pypolca-careful+Polypolish-careful_introduced` <- ifelse(introduced$`pypolca-careful+Polypolish-careful` - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`pypolca-careful+Polypolish_introduced` <- ifelse(introduced$`pypolca-careful+Polypolish` - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`pypolca+Polypolish-careful_introduced` <- ifelse(introduced$`pypolca+Polypolish-careful` - introduced$before_polish > 0, TRUE, FALSE)
+
+total_results <- introduced %>%
   group_by(depth) %>%
   summarise(before_polish = sum(before_polish),
             polypolish_errors = sum(Polypolish),
+            polypolish_introduced = any(Polypolish_introduced),
             polypolish_careful_errors = sum(`Polypolish-careful`),
+            polypolish_careful_introduced = any(`Polypolish-careful_introduced`),
             pypolca_errors = sum(pypolca),
+            pypolca_introduced = any(pypolca_introduced),
             pypolca_careful_errors = sum(`pypolca-careful`),
+            pypolca_careful_introduced = any(`pypolca-careful_introduced`),
             hypo_errors = sum(HyPo),
+            hypo_introduced = any(HyPo_introduced),
             fmlrc2_errors = sum(FMLRC2),
+            fmlrc2_introduced = any(FMLRC2_introduced),
             nextpolish_errors = sum(NextPolish),
+            nextpolish_introduced = any(NextPolish_introduced),
             pilon_errors = sum(Pilon),
+            pilon_introduced = any(Pilon_introduced),
             polypolish_pypolca_errors = sum(`Polypolish+pypolca`),
+            polypolish_pypolca_introduced = any(`Polypolish+pypolca_introduced`),
             polypolish_careful_pypolca_careful_errors = sum(`Polypolish-careful+pypolca-careful`),
+            polypolish_careful_pypolca_careful_introduced = any(`Polypolish-careful+pypolca-careful_introduced`),
             polypolish_careful_pypolca_errors = sum(`Polypolish-careful+pypolca`),
+            polypolish_careful_pypolca_introduced = any(`Polypolish-careful+pypolca_introduced`),
             polypolish_pypolca_careful_errors = sum(`Polypolish+pypolca-careful`),
+            polypolish_pypolca_careful_introduced = any(`Polypolish+pypolca-careful_introduced`),
             pypolca_polypolish_errors = sum(`pypolca+Polypolish`),
+            pypolca_polypolish_introduced = any(`pypolca+Polypolish_introduced`),
             pypolca_careful_polypolish_careful_errors = sum(`pypolca-careful+Polypolish-careful`),
+            pypolca_careful_polypolish_careful_introduced = any(`pypolca-careful+Polypolish-careful_introduced`),
             pypolca_careful_polypolish_errors = sum(`pypolca-careful+Polypolish`),
-            pypolca_polypolish_careful_errors = sum(`pypolca+Polypolish-careful`))
+            pypolca_careful_polypolish_introduced = any(`pypolca-careful+Polypolish_introduced`),
+            pypolca_polypolish_careful_errors = sum(`pypolca+Polypolish-careful`),
+            pypolca_polypolish_careful_introduced = any(`pypolca+Polypolish-careful_introduced`))
 ```
 
 Plot the total errors vs Illumina depth for each polisher and polisher combination. These plots cap the y-axis at 45 and indicate peak errors with text as necessary:
 ```{r single_tool_plots, fig.width = 10, fig.height = 12}
-plot_to_45 <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE) {
+plot_to_45 <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE, include_colour = FALSE) {
+  if (include_colour) {
+    colours <- scale_colour_manual(values = c("TRUE" = "#CC0000", "FALSE" = "#127EAD"))
+  } else {
+    colours <- scale_colour_manual(values = c("TRUE" = "#662929", "FALSE" = "#662929"))
+  }
+  introduced_column <- gsub("_errors", "_introduced", column_name)
   peak_index <- which.max(total_results[[column_name]])
   peak_errors <- total_results[[column_name]][peak_index]
   peak_depth <- total_results$depth[peak_index]
   peak_label = paste("peak:\n", peak_errors, " errors", sep="")
-  p <- ggplot(total_results, aes(x=depth, y=!!sym(column_name))) +
-    geom_hline(yintercept = 37, color="#004488", linetype = "dashed") +
-    geom_point(color="#662929", size=1.25) + 
-    theme_bw() +
+  p <- ggplot(total_results, aes(x=depth, y=!!sym(column_name), colour=!!sym(introduced_column))) +
+    geom_hline(yintercept = 37, color="#3A3A3A", linetype = "dashed") +
+    geom_point(size=1.25) + colours +
+    theme_bw() + theme(legend.position = "none") +
     scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, 45), expand = c(0, 0)) +
     labs(title=polisher_name, x="Illumina depth", y="Errors")
   if (peak_errors > 45) {
-    p <- p + annotate("text", label=peak_label, x=7.5, y=41.3, colour="#662929", lineheight = 0.9)
+    p <- p + annotate("text", label=peak_label, x=7.5, y=41.3, colour="#AF0000", lineheight = 0.9)
   }
   if (no_x) {
     p <- p + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
@@ -95,22 +135,36 @@ plot_to_45 <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE) {
   return(p)
 }
 
-p1 <- plot_to_45("polypolish_errors", "Polypolish-default", FALSE, FALSE)
-p2 <- plot_to_45("pypolca_errors", "pypolca-default", FALSE, TRUE)
-p3 <- plot_to_45("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE)
-p4 <- plot_to_45("pypolca_careful_errors", "pypolca-careful", FALSE, TRUE)
-p5 <- plot_to_45("fmlrc2_errors", "FMLRC2", FALSE, FALSE)
-p6 <- plot_to_45("hypo_errors", "HyPo", FALSE, TRUE)
-p7 <- plot_to_45("nextpolish_errors", "NextPolish", FALSE, FALSE)
-p8 <- plot_to_45("pilon_errors", "Pilon", FALSE, TRUE)
+include_colours = FALSE
+p1 <- plot_to_45("polypolish_errors", "Polypolish-default", FALSE, FALSE, include_colours)
+p2 <- plot_to_45("pypolca_errors", "pypolca-default", FALSE, TRUE, include_colours)
+p3 <- plot_to_45("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE, include_colours)
+p4 <- plot_to_45("pypolca_careful_errors", "pypolca-careful", FALSE, TRUE, include_colours)
+p5 <- plot_to_45("fmlrc2_errors", "FMLRC2", FALSE, FALSE, include_colours)
+p6 <- plot_to_45("hypo_errors", "HyPo", FALSE, TRUE, include_colours)
+p7 <- plot_to_45("nextpolish_errors", "NextPolish", FALSE, FALSE, include_colours)
+p8 <- plot_to_45("pilon_errors", "Pilon", FALSE, TRUE, include_colours)
 
+jpeg(file = paste(plot_dir, "Figure2.jpeg", sep = "/" ), units = "in",
+     width = 10,
+     height = 12, bg = "transparent", res = 600)
 
+plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
+dev.off()
 
+include_colours = TRUE
+p1 <- plot_to_45("polypolish_errors", "Polypolish-default", FALSE, FALSE, include_colours)
+p2 <- plot_to_45("pypolca_errors", "pypolca-default", FALSE, TRUE, include_colours)
+p3 <- plot_to_45("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE, include_colours)
+p4 <- plot_to_45("pypolca_careful_errors", "pypolca-careful", FALSE, TRUE, include_colours)
+p5 <- plot_to_45("fmlrc2_errors", "FMLRC2", FALSE, FALSE, include_colours)
+p6 <- plot_to_45("hypo_errors", "HyPo", FALSE, TRUE, include_colours)
+p7 <- plot_to_45("nextpolish_errors", "NextPolish", FALSE, FALSE, include_colours)
+p8 <- plot_to_45("pilon_errors", "Pilon", FALSE, TRUE, include_colours)
 
-jpeg(file = paste(plot_dir, "Figure2.jpeg", sep = "/" ), units = "in", 
-     width = 9, 
-     height = 16, bg = "transparent", res = 600)
-
+jpeg(file = paste(plot_dir, "Figure2_with_colours.jpeg", sep = "/" ), units = "in",
+     width = 10,
+     height = 12, bg = "transparent", res = 600)
 
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()
@@ -126,9 +180,9 @@ p6 <- plot_to_45("pypolca_careful_polypolish_errors", "pypolca-careful + Polypol
 p7 <- plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish-careful + pypolca-careful", FALSE, FALSE)
 p8 <- plot_to_45("pypolca_careful_polypolish_careful_errors", "pypolca-careful + Polypolish-careful", FALSE, TRUE)
 
-jpeg(file = paste(plot_dir, "Figure3.jpeg", sep = "/" ), units = "in", 
-     width = 9, 
-     height = 16, bg = "transparent", res = 600)
+jpeg(file = paste(plot_dir, "Figure3.jpeg", sep = "/" ), units = "in",
+     width = 10,
+     height = 12, bg = "transparent", res = 600)
 
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()
@@ -136,13 +190,15 @@ dev.off()
 
 Plot the single polishers with their full range:
 
-```{r plot_full_range, fig.width = 15, fig.height = 9}
+```{r plot_full_range, fig.width = 10, fig.height = 12}
 plot_full_range <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE) {
+  introduced_column <- gsub("_errors", "_introduced", column_name)
   max_y <- max(total_results[[column_name]], na.rm = TRUE) * 1.05
-  p <- ggplot(total_results, aes(x=depth, y=!!sym(column_name))) +
-    geom_hline(yintercept = 37, color="#004488", linetype = "dashed") +
-    geom_point(color="#662929", size=1.25) + 
-    theme_bw() +
+  p <- ggplot(total_results, aes(x=depth, y=!!sym(column_name), colour=!!sym(introduced_column))) +
+    geom_hline(yintercept = 37, color="#3A3A3A", linetype = "dashed") +
+    geom_point(size=1.25) +
+    scale_colour_manual(values = c("TRUE" = "#CC0000", "FALSE" = "#127EAD")) +
+    theme_bw() + theme(legend.position = "none") +
     scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, max_y), expand = c(0, 0)) +
     labs(title=polisher_name, x="Illumina depth", y="Errors")
@@ -166,9 +222,9 @@ p8 <- plot_full_range("pilon_errors", "Pilon", FALSE, TRUE)
 
 
 
-jpeg(file = paste(plot_dir, "Supp_Figure1.jpeg", sep = "/" ), units = "in", 
-     width = 9, 
-     height = 16, bg = "transparent", res = 600)
+jpeg(file = paste(plot_dir, "Supp_Figure1.jpeg", sep = "/" ), units = "in",
+     width = 10,
+     height = 12, bg = "transparent", res = 600)
 
 
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
