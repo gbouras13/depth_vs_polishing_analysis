@@ -92,7 +92,7 @@ cj_plot <- generate_plot("ATCC_33560_Campylobacter_jejuni", 5, "ATCC 33560", "Ca
 lm_plot <- generate_plot("ATCC_BAA-679_Listeria_monocytogenes", 0, "ATCC BAA-679", "Listeria monocytogenes")
 
 
-jpeg(file = paste(plot_dir, "SuppFig2.jpeg", sep = "/" ), units = "in", 
+jpeg(file = paste(plot_dir, "Supp_Figure6.jpeg", sep = "/" ), units = "in", 
      width = 9, 
      height = 16, bg = "transparent", res = 600)
 
@@ -107,7 +107,7 @@ dev.off()
 ```
 
 
-Make a dataframe with the error counts totaled over all 7 genomes (excluding the depths where E. coli and L. monocytogenes have problems with the automated Flye long read assemblies).
+Make a dataframe with the error counts totaled over all 7 genomes (excluding the depths where E. coli and L. monocytogenes have problems with the automated Flye long read assemblies). Didn't actually end up including this.
 
 ```{r totals}
 total_results <- per_genome_results %>%
@@ -131,17 +131,11 @@ ymax <- 100
     scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
     labs(title= "Total Hybracter Errors for 7 Genomes Without Assembly Heterogeneity", x="Illumina depth", y="Errors")
 
-  jpeg(file = paste(plot_dir, "SuppFig3.jpeg", sep = "/" ), units = "in", 
-     width = 9, 
-     height = 16, bg = "transparent", res = 600)
 
-  p
-  
-  dev.off()
   
 ```
 
-Look at where Hybracter Best (aka the intermediate assemblies ALE score highest) and Hybracter Last differ - Best is never better than Last, and often worse. It will be worse where ALE thinks an assembly before Pypolca polishing is better than the Pypolca polished version.
+Look at where Hybracter Best (aka the intermediate assemblies ALE score highest) and Hybracter Last differ - Best is never better than Last, and often worse. It will be worse where ALE thinks an assembly before Pypolca polishing is better than the Pypolca polished version. 
 
 
 ```{r per genome comp plot}

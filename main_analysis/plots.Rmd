@@ -1,7 +1,7 @@
 ---
 title: "Low-depth Illumina polishing"
-date: "2024-01-22"
-author: "Ryan Wick"
+date: "2024-02-29"
+author: "Ryan Wick, George Bouras"
 output:
   html_document:
     pandoc_args: ["+RTS", "-K64m", "-RTS", "--self-contained",]
@@ -162,13 +162,75 @@ p6 <- plot_to_45("hypo_errors", "HyPo", FALSE, TRUE, include_colours)
 p7 <- plot_to_45("nextpolish_errors", "NextPolish", FALSE, FALSE, include_colours)
 p8 <- plot_to_45("pilon_errors", "Pilon", FALSE, TRUE, include_colours)
 
-jpeg(file = paste(plot_dir, "Figure2_with_colours.jpeg", sep = "/" ), units = "in",
+jpeg(file = paste(plot_dir, "Supp_Figure3.jpeg", sep = "/" ), units = "in",
      width = 10,
      height = 12, bg = "transparent", res = 600)
 
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()
 ```
+
+Count introduced per interval
+
+```{r overall per interval}
+
+print("Polypolish default per genome introduction - at least 1/9")
+table(total_results$polypolish_introduced)
+
+print("Polypolish careful per genome introduction - at least 1/9")
+table(total_results$polypolish_careful_introduced)
+
+print("Pypolca default per genome introduction - at least 1/9")
+table(total_results$pypolca_introduced)
+
+print("Pypolca default per genome introduction - at least 1/9")
+table(total_results$pypolca_careful_introduced)
+
+print("HyPo per genome introduction - at least 1/9")
+table(total_results$hypo_introduced)
+
+print("Pilon per genome introduction - at least 1/9")
+table(total_results$pilon_introduced)
+
+print("Nextpolish per genome introduction - at least 1/9")
+table(total_results$nextpolish_introduced)
+
+print("FMLRC2 per genome introduction - at least 1/9")
+table(total_results$fmlrc2_introduced)
+
+```
+
+
+Count introduced per genome
+
+```{r overall per genome}
+
+print("Polypolish default per genome introduction - at least 1/9")
+table(introduced$Polypolish_introduced)
+
+print("Polypolish careful per genome introduction - at least 1/9")
+table(introduced$`Polypolish-careful_introduced`)
+
+print("Pypolca default per genome introduction - at least 1/9")
+table(introduced$pypolca_introduced)
+
+print("Pypolca default per genome introduction - at least 1/9")
+table(introduced$`pypolca-careful_introduced`)
+
+print("HyPo per genome introduction - at least 1/9")
+table(introduced$HyPo_introduced)
+
+print("Pilon per genome introduction - at least 1/9")
+table(introduced$Pilon_introduced)
+
+print("Nextpolish per genome introduction - at least 1/9")
+table(introduced$NextPolish_introduced)
+
+print("FMLRC2 per genome introduction - at least 1/9")
+table(introduced$FMLRC2_introduced)
+
+```
+
 
 ```{r polypolish_pypolca_combinations, fig.width = 10, fig.height = 12}
 p1 <- plot_to_45("polypolish_pypolca_errors", "Polypolish-default + pypolca-default", FALSE, FALSE)
@@ -180,7 +242,7 @@ p6 <- plot_to_45("pypolca_careful_polypolish_errors", "pypolca-careful + Polypol
 p7 <- plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish-careful + pypolca-careful", FALSE, FALSE)
 p8 <- plot_to_45("pypolca_careful_polypolish_careful_errors", "pypolca-careful + Polypolish-careful", FALSE, TRUE)
 
-jpeg(file = paste(plot_dir, "Figure3.jpeg", sep = "/" ), units = "in",
+jpeg(file = paste(plot_dir, "Supp_Figure5.jpeg", sep = "/" ), units = "in",
      width = 10,
      height = 12, bg = "transparent", res = 600)
 
@@ -222,7 +284,7 @@ p8 <- plot_full_range("pilon_errors", "Pilon", FALSE, TRUE)
 
 
 
-jpeg(file = paste(plot_dir, "Supp_Figure1.jpeg", sep = "/" ), units = "in",
+jpeg(file = paste(plot_dir, "Supp_Figure2.jpeg", sep = "/" ), units = "in",
      width = 10,
      height = 12, bg = "transparent", res = 600)
 
@@ -373,7 +435,37 @@ total_results %>%  filter(depth >= 25) %>%
 ```
 
 
-Get mean min max errors from 25+ for single polishers
+Get the means by each 5x depth bin for the 3 best polishers (Table 3)
+
+```{r}
+
+df_subset <- total_results[, c("depth","polypolish_careful_errors", "pypolca_careful_errors", "polypolish_errors")]
+
+errors_by_bin <- df_subset %>%  
+  filter(depth >= 0 ) %>% 
+  mutate(bin = cut(depth, breaks = seq(0, max(depth) + 5, by = 5), include.lowest = TRUE)) %>%
+  pivot_longer(cols = polypolish_errors:polypolish_careful_errors,
+               names_to = "polisher", values_to = "value") %>%
+  group_by(polisher, bin) %>%
+  summarize(
+    mean_errors = mean(value, na.rm = TRUE),
+    median_errors = median(value, na.rm = TRUE),
+    sd_errors = sd(value, na.rm = TRUE),
+    min_errors = min(value, na.rm = TRUE),
+    max_errors = max(value, na.rm = TRUE),
+    improvements = sum(value < 37, na.rm = TRUE),
+    worse = sum(value > 37, na.rm = TRUE),
+    equal = sum(value == 37, na.rm = TRUE),
+  )
+
+errors_by_bin %>%  view()
+
+
+
+```
+
+
+Get mean min max errors from 25+ for combination polishers
 ```{r}
 
 

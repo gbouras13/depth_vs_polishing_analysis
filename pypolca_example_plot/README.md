@@ -47,8 +47,8 @@ samtools index diff_alignment_sorted.bam
 * To generate a mixture where ratio is between 2 and 3
 
 ```
-iss generate --genomes ATCC_25922_plasmid_4_with_error.fasta --cpus 8 --model HiSeq  --compress --n_reads 7 --output ATCC_25922_plasmid_4_error_ratio
-iss generate --genomes ATCC_25922_plasmid_4.fasta --cpus 8 --model HiSeq  --compress --n_reads 4 --output ATCC_25922_plasmid_4_correct_ratio
+iss generate --genomes ATCC_25922_plasmid_4_with_error.fasta --cpus 8 --model HiSeq  --compress --n_reads 14 --output ATCC_25922_plasmid_4_error_ratio
+iss generate --genomes ATCC_25922_plasmid_4.fasta --cpus 8 --model HiSeq  --compress --n_reads 5 --output ATCC_25922_plasmid_4_correct_ratio
 
 cat ATCC_25922_plasmid_4_error_ratio_R1.fastq.gz ATCC_25922_plasmid_4_correct_ratio_R1.fastq.gz > ATCC_25922_plasmid_4_combined_ratio_R1.fastq.gz
 cat ATCC_25922_plasmid_4_error_ratio_R2.fastq.gz ATCC_25922_plasmid_4_correct_ratio_R2.fastq.gz > ATCC_25922_plasmid_4_combined_ratio_R2.fastq.gz
