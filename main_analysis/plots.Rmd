@@ -116,7 +116,7 @@ plot_to_45 <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE, i
   peak_errors <- total_results[[column_name]][peak_index]
   peak_depth <- total_results$depth[peak_index]
   peak_label = paste("peak:\n", peak_errors, " errors", sep="")
-  p <- ggplot(total_results, aes(x=depth, y=!!sym(column_name), colour=!!sym(introduced_column))) +
+  p <- ggplot(total_results, aes(x=depth, y=!!sym(column_name), colour=!!sym(introduced_column) )) +
     geom_hline(yintercept = 37, color="#3A3A3A", linetype = "dashed") +
     geom_point(size=1.25) + colours +
     theme_bw() + theme(legend.position = "none") +
@@ -137,9 +137,9 @@ plot_to_45 <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE, i
 
 include_colours = FALSE
 p1 <- plot_to_45("polypolish_errors", "Polypolish-default", FALSE, FALSE, include_colours)
-p2 <- plot_to_45("pypolca_errors", "pypolca-default", FALSE, TRUE, include_colours)
+p2 <- plot_to_45("pypolca_errors", "Pypolca-default", FALSE, TRUE, include_colours)
 p3 <- plot_to_45("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE, include_colours)
-p4 <- plot_to_45("pypolca_careful_errors", "pypolca-careful", FALSE, TRUE, include_colours)
+p4 <- plot_to_45("pypolca_careful_errors", "Pypolca-careful", FALSE, TRUE, include_colours)
 p5 <- plot_to_45("fmlrc2_errors", "FMLRC2", FALSE, FALSE, include_colours)
 p6 <- plot_to_45("hypo_errors", "HyPo", FALSE, TRUE, include_colours)
 p7 <- plot_to_45("nextpolish_errors", "NextPolish", FALSE, FALSE, include_colours)
@@ -154,9 +154,9 @@ dev.off()
 
 include_colours = TRUE
 p1 <- plot_to_45("polypolish_errors", "Polypolish-default", FALSE, FALSE, include_colours)
-p2 <- plot_to_45("pypolca_errors", "pypolca-default", FALSE, TRUE, include_colours)
+p2 <- plot_to_45("pypolca_errors", "Pypolca-default", FALSE, TRUE, include_colours)
 p3 <- plot_to_45("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE, include_colours)
-p4 <- plot_to_45("pypolca_careful_errors", "pypolca-careful", FALSE, TRUE, include_colours)
+p4 <- plot_to_45("pypolca_careful_errors", "Pypolca-careful", FALSE, TRUE, include_colours)
 p5 <- plot_to_45("fmlrc2_errors", "FMLRC2", FALSE, FALSE, include_colours)
 p6 <- plot_to_45("hypo_errors", "HyPo", FALSE, TRUE, include_colours)
 p7 <- plot_to_45("nextpolish_errors", "NextPolish", FALSE, FALSE, include_colours)
@@ -233,14 +233,14 @@ table(introduced$FMLRC2_introduced)
 
 
 ```{r polypolish_pypolca_combinations, fig.width = 10, fig.height = 12}
-p1 <- plot_to_45("polypolish_pypolca_errors", "Polypolish-default + pypolca-default", FALSE, FALSE)
-p2 <- plot_to_45("pypolca_polypolish_errors", "pypolca-default + Polypolish-default", FALSE, TRUE)
-p3 <- plot_to_45("polypolish_careful_pypolca_errors", "Polypolish-careful + pypolca-default", TRUE, FALSE)
-p4 <- plot_to_45("pypolca_polypolish_careful_errors", "pypolca-default + Polypolish-careful", TRUE, TRUE)
-p5 <- plot_to_45("polypolish_pypolca_careful_errors", "Polypolish-default + pypolca-careful", FALSE, FALSE)
-p6 <- plot_to_45("pypolca_careful_polypolish_errors", "pypolca-careful + Polypolish-default", FALSE, TRUE)
-p7 <- plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish-careful + pypolca-careful", FALSE, FALSE)
-p8 <- plot_to_45("pypolca_careful_polypolish_careful_errors", "pypolca-careful + Polypolish-careful", FALSE, TRUE)
+p1 <- plot_to_45("polypolish_pypolca_errors", "Polypolish-default + Pypolca-default", FALSE, FALSE)
+p2 <- plot_to_45("pypolca_polypolish_errors", "Pypolca-default + Polypolish-default", FALSE, TRUE)
+p3 <- plot_to_45("polypolish_careful_pypolca_errors", "Polypolish-careful + Pypolca-default", TRUE, FALSE)
+p4 <- plot_to_45("pypolca_polypolish_careful_errors", "Pypolca-default + Polypolish-careful", TRUE, TRUE)
+p5 <- plot_to_45("polypolish_pypolca_careful_errors", "Polypolish-default + Pypolca-careful", FALSE, FALSE)
+p6 <- plot_to_45("pypolca_careful_polypolish_errors", "Pypolca-careful + Polypolish-default", FALSE, TRUE)
+p7 <- plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish-careful + Pypolca-careful", FALSE, FALSE)
+p8 <- plot_to_45("pypolca_careful_polypolish_careful_errors", "Pypolca-careful + Polypolish-careful", FALSE, TRUE)
 
 jpeg(file = paste(plot_dir, "Supp_Figure5.jpeg", sep = "/" ), units = "in",
      width = 10,
@@ -253,12 +253,17 @@ dev.off()
 Plot the single polishers with their full range:
 
 ```{r plot_full_range, fig.width = 10, fig.height = 12}
-plot_full_range <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE) {
+plot_full_range <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE, include_colour = FALSE) {
+  if (include_colour) {
+    colours <- scale_colour_manual(values = c("TRUE" = "#CC0000", "FALSE" = "#127EAD"))
+  } else {
+    colours <- scale_colour_manual(values = c("TRUE" = "#662929", "FALSE" = "#662929"))
+  }
   introduced_column <- gsub("_errors", "_introduced", column_name)
   max_y <- max(total_results[[column_name]], na.rm = TRUE) * 1.05
-  p <- ggplot(total_results, aes(x=depth, y=!!sym(column_name), colour=!!sym(introduced_column))) +
+  p <- ggplot(total_results, aes(x=depth,y=!!sym(column_name),colour=!!sym(introduced_column) )) +
     geom_hline(yintercept = 37, color="#3A3A3A", linetype = "dashed") +
-    geom_point(size=1.25) +
+    geom_point(size=1.25) + colours +
     scale_colour_manual(values = c("TRUE" = "#CC0000", "FALSE" = "#127EAD")) +
     theme_bw() + theme(legend.position = "none") +
     scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
@@ -273,10 +278,10 @@ plot_full_range <- function(column_name, polisher_name, no_x = FALSE, no_y = FAL
   return(p)
 }
 
-p1 <- plot_full_range("polypolish_errors", "Polypolish-default", FALSE, FALSE)
-p2 <- plot_full_range("pypolca_errors", "pypolca-default", FALSE, TRUE)
+p1 <- plot_full_range("polypolish_errors", "Polypolish-default", FALSE, FALSE, include_colour=FALSE)
+p2 <- plot_full_range("pypolca_errors", "Pypolca-default", FALSE, TRUE)
 p3 <- plot_full_range("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE)
-p4 <- plot_full_range("pypolca_careful_errors", "pypolca-careful", FALSE, TRUE)
+p4 <- plot_full_range("pypolca_careful_errors", "Pypolca-careful", FALSE, TRUE)
 p5 <- plot_full_range("fmlrc2_errors", "FMLRC2", FALSE, FALSE)
 p6 <- plot_full_range("hypo_errors", "HyPo", FALSE, TRUE)
 p7 <- plot_full_range("nextpolish_errors", "NextPolish", FALSE, FALSE)
@@ -290,6 +295,7 @@ jpeg(file = paste(plot_dir, "Supp_Figure2.jpeg", sep = "/" ), units = "in",
 
 
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
+
 dev.off()
 
 ```
