@@ -264,7 +264,6 @@ plot_full_range <- function(column_name, polisher_name, no_x = FALSE, no_y = FAL
   p <- ggplot(total_results, aes(x=depth,y=!!sym(column_name),colour=!!sym(introduced_column) )) +
     geom_hline(yintercept = 37, color="#3A3A3A", linetype = "dashed") +
     geom_point(size=1.25) + colours +
-    scale_colour_manual(values = c("TRUE" = "#CC0000", "FALSE" = "#127EAD")) +
     theme_bw() + theme(legend.position = "none") +
     scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, max_y), expand = c(0, 0)) +
@@ -279,13 +278,13 @@ plot_full_range <- function(column_name, polisher_name, no_x = FALSE, no_y = FAL
 }
 
 p1 <- plot_full_range("polypolish_errors", "Polypolish-default", FALSE, FALSE, include_colour=FALSE)
-p2 <- plot_full_range("pypolca_errors", "Pypolca-default", FALSE, TRUE)
-p3 <- plot_full_range("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE)
-p4 <- plot_full_range("pypolca_careful_errors", "Pypolca-careful", FALSE, TRUE)
-p5 <- plot_full_range("fmlrc2_errors", "FMLRC2", FALSE, FALSE)
-p6 <- plot_full_range("hypo_errors", "HyPo", FALSE, TRUE)
-p7 <- plot_full_range("nextpolish_errors", "NextPolish", FALSE, FALSE)
-p8 <- plot_full_range("pilon_errors", "Pilon", FALSE, TRUE)
+p2 <- plot_full_range("pypolca_errors", "Pypolca-default", FALSE, TRUE,include_colour=FALSE)
+p3 <- plot_full_range("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE,include_colour=FALSE)
+p4 <- plot_full_range("pypolca_careful_errors", "Pypolca-careful", FALSE, TRUE,include_colour=FALSE)
+p5 <- plot_full_range("fmlrc2_errors", "FMLRC2", FALSE, FALSE,include_colour=FALSE)
+p6 <- plot_full_range("hypo_errors", "HyPo", FALSE, TRUE,include_colour=FALSE)
+p7 <- plot_full_range("nextpolish_errors", "NextPolish", FALSE, FALSE,include_colour=FALSE)
+p8 <- plot_full_range("pilon_errors", "Pilon", FALSE, TRUE,include_colour=FALSE)
 
 
 

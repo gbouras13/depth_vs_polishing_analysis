@@ -1,18 +1,20 @@
-# depth_vs_polishing_analysis
+# How Low Can You Go? Short-read polishing of Oxford Nanopore bacterial genome assemblies Code Repository
 
-Repository to hold miscellaneous data for the depth vs polishing paper
+This repository holds code and data for the _How Low Can You Go? Short-read polishing of Oxford Nanopore bacterial genome assemblies_ manuscript.
 
 Contents:
-* `ont_assemblies`: contains the ONT-only assemblies used as a starting point for polishing.
+* `main_analysis`: contains the read subsampling, polishing and plotting commands for the main analysis and most of the figures in the paper.
+* `ont_assemblies`: contains the ONT-only [Trycycler](https://github.com/rrwick/Trycycler) assemblies used as a starting point for polishing.
 * `reference_assemblies`: contains the polished and manually curated assemblies used as a ground truth.
-* `main_analysis`: contains the read subsampling, polishing and plotting commands for the main analysis of the paper.
-* `errors_in_repeats`: contains the details of the errors-in-repeats analysis shown in Figure SX.
-* `long_homopolymer`: contains the details of the long-homopolymer analysis shown in Figure SX.
-* `supp_figures`: contains the paper's supplementary figures.
+* `reference_chromosome_assemblies_hybracter`: contains the polished and manually curated assemblies used as a ground truth, chromosomes only. Used for the Hybracter analysis.
+* `errors_in_repeats`: contains the details of the errors-in-repeats analysis shown in Figure S1.
+* `long_homopolymer`: contains the details of the long-homopolymer analysis shown in Figure S4.
+* `Figures`: contains all of the manuscript's man and supplementary figures.
 * `supp_tables.xlsx`: contains the paper's supplementary tables.
+* `hybracter_analysis`: contains the read subsampling assembly and plotting commands for the [Hybracter]() analysis in the paper (Figures S6 and S7).
+* `pypolca_example_plot`: contains code to simulate reads, errors and make Figure 1.
 
-
-ONT and Illumina reads are not included in this repo due to size, but they can be found on SRA:
+ONT and Illumina reads are not included in this repository due to size, but they can be found on SRA:
 
 | Genome                                  | ONT reads                                                         | Illumina reads                                                    |
 |-----------------------------------------|-------------------------------------------------------------------|-------------------------------------------------------------------|

@@ -70,7 +70,8 @@ generate_plot <- function(genome_name, long_only_trycycler_threshold, atcc_name,
     geom_point(color="#662929", size=1.25) + 
     theme_bw() +
     scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
-    scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, ymax), expand = c(0, 0),
+                       breaks = function(x) unique(floor(pretty(seq(min(x), (max(x) + 1) * 1.1))))) +
     labs(title= bquote(.(atcc_name) ~ italic(.(italics_name))) , x="Illumina depth", y="Errors")
   
   return(p)
@@ -128,7 +129,8 @@ ymax <- 100
                color="#004488", linetype = "dashed") +
     theme_bw() +
     scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
-    scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, ymax), expand = c(0, 0),
+                       breaks = function(x) unique(floor(pretty(seq(min(x), (max(x) + 1) * 1.1))))) +
     labs(title= "Total Hybracter Errors for 7 Genomes Without Assembly Heterogeneity", x="Illumina depth", y="Errors")
 
 

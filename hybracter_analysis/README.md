@@ -1,7 +1,9 @@
-## Starting files
+# Hybracter Analysis
 
-* For the `hybracter` analysis, we decided to run all assemblies from scratch implementing our recommended best practices in the `main_analysis` benchmarking. These changes were implemented in `hybracter` v0.7.0.
-* This also takes into account various factors such as assembler non-determinism (most assemblers, including Flye, are [not deterministic](https://plassembler.readthedocs.io/en/latest/flye_non_determinism/) ).
+This directory contains code required to conduct the [Hybracter](https://github.com/gbouras13/hybracter) analysis (Figures S6-S7).
+
+* For the `hybracter` analysis, we decided to run all assemblies from scratch implementing our recommended best polishing practices from the `main_analysis` benchmarking. These changes were implemented in `hybracter` v0.7.0.
+* The results takes into account various factors such as assembler non-determinism (most assemblers, including Flye, are [not deterministic](https://plassembler.readthedocs.io/en/latest/flye_non_determinism/) ) and structural errors. These assemblies were excluded. You can read more about them [here](https://rrwick.github.io/2024/02/15/misassemblies.html).
 * To test out the effect of short read polishing at different depths, we pre subsampled the short reads similar to the `main_analysis`
 * We used `hybracter v0.7.0` with default settings (which will subsampling the long reads to the best estimated 100x coverage read set - in practice slightly less here depending on the `-c` minimum chromosome length used)
 * We also conducted no QC prior to `hybracter`, as it is included by default.
@@ -12,7 +14,6 @@
 mv SRR27638402.fastq.gz SRR27638402_original.fastq.gz
 filtlong --target_bases 1000000000 --min_mean_q 15 --min_length 1000 SRR27638402_original.fastq.gz | pigz > SRR27638402.fastq.gz
 ```
-
 
 ## Subsample reads
 
@@ -91,7 +92,6 @@ done
 ```
 
 
-
 Make a read info table:
 ```bash
 printf "genome\tgenome_size\ttarget_illumina_depth\tread_count\tread_bases\tactual_illumina_depth\n" > "$base_dir"/reads.tsv
@@ -107,14 +107,14 @@ for d in $(seq -f "%02.0f" 1 1 50); do
 done
 ```
 
-### hybracter
+## Run Hybracter
 
 * per sample to save some space
 * One QC step before to save time 
 * Buy default, this was with `--logic last`
 
 
-```
+```bash
 mkdir -p hybracter_outputs
 
 
@@ -140,19 +140,7 @@ hybracter hybrid -i csvs/ATCC_17802_Vibrio_parahaemolyticus.csv -o hybracter_out
 
 ```
 
-
-
-
-```bash 
-
-mamba create -n compare_assemblies mappy edlib
-conda activate compare_assemblies
-```
-
-
-
-
-## Process results
+## Process and Compare Results
 
 * Assess assemblies with [`compare_assemblies.py`](https://github.com/rrwick/Perfect-bacterial-genome-tutorial/wiki/Comparing-assemblies) script:
 
@@ -168,10 +156,10 @@ mv ATCC_17802_Vibrio_parahaemolyticus_dnaapler/dnaapler_reoriented.fasta    refe
 
 * ALE often preferred worse pre-polished assemblies as best (aka `--logic best` in hybracter), so I decided to also check this with the `pypolca` output aka what you would get if you ran `-logic last`
 
-
 ```bash
 
 mamba create -n compare_assemblies edlib mappy
+conda activate compare_assemblies
 
 base_dir=/home/user/Documents/hybracter_polishing_analysis
 read_dir=/home/user/Documents/hybracter_polishing_analysis/short_reads
@@ -241,7 +229,6 @@ genomes=(
 
 for a in "${genomes[@]}"; do
     base_dir=/home/user/Documents/hybracter_polishing_analysis
-
     cp "$base_dir"/hybracter_outputs/"$a"/FINAL_OUTPUT/hybracter_summary.tsv hybracter_summary_tsvs/"$a".tsv
 
 done
