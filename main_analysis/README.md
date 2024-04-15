@@ -198,11 +198,11 @@ for d in $(seq -f "%04.1f" 0.1 0.1 50); do
         draft="$base_dir"/drafts/"$a".fasta
 
         pypolca run -a "$draft" -1 reads_1.fastq.gz -2 reads_2.fastq.gz -t 24 -o pypolca > pypolca.txt 2>&1
-        seqtk seq pypolca/polca_corrected.fasta > pypolca.fasta
+        seqtk seq pypolca/pypolca_corrected.fasta > pypolca.fasta
         rm -r pypolca
 
         pypolca run --careful -a "$draft" -1 reads_1.fastq.gz -2 reads_2.fastq.gz -t 24 -o pypolca > pypolca-careful.txt 2>&1
-        seqtk seq pypolca/polca_corrected.fasta > pypolca-careful.fasta
+        seqtk seq pypolca/pypolca_corrected.fasta > pypolca-careful.fasta
         rm -r pypolca
 
         gzip pypolca.fasta pypolca-careful.fasta
@@ -316,19 +316,19 @@ for d in $(seq -f "%04.1f" 0.1 0.1 50); do
         gunzip polypolish.fasta.gz polypolish-careful.fasta.gz
 
         pypolca run -a polypolish.fasta -1 reads_1.fastq.gz -2 reads_2.fastq.gz -t 24 -o pypolca > polypolish__pypolca.txt 2>&1
-        seqtk seq pypolca/polca_corrected.fasta > polypolish__pypolca.fasta
+        seqtk seq pypolca/pypolca_corrected.fasta > polypolish__pypolca.fasta
         rm -r pypolca
 
         pypolca run --careful -a polypolish-careful.fasta -1 reads_1.fastq.gz -2 reads_2.fastq.gz -t 24 -o pypolca > polypolish-careful__pypolca-careful.txt 2>&1
-        seqtk seq pypolca/polca_corrected.fasta > polypolish-careful__pypolca-careful.fasta
+        seqtk seq pypolca/pypolca_corrected.fasta > polypolish-careful__pypolca-careful.fasta
         rm -r pypolca
 
         pypolca run -a polypolish-careful.fasta -1 reads_1.fastq.gz -2 reads_2.fastq.gz -t 24 -o pypolca > polypolish-careful__pypolca.txt 2>&1
-        seqtk seq pypolca/polca_corrected.fasta > polypolish-careful__pypolca.fasta
+        seqtk seq pypolca/pypolca_corrected.fasta > polypolish-careful__pypolca.fasta
         rm -r pypolca
 
         pypolca run --careful -a polypolish.fasta -1 reads_1.fastq.gz -2 reads_2.fastq.gz -t 24 -o pypolca > polypolish__pypolca-careful.txt 2>&1
-        seqtk seq pypolca/polca_corrected.fasta > polypolish__pypolca-careful.fasta
+        seqtk seq pypolca/pypolca_corrected.fasta > polypolish__pypolca-careful.fasta
         rm -r pypolca
 
         gzip polypolish.fasta polypolish-careful.fasta polypolish__pypolca.fasta polypolish-careful__pypolca-careful.fasta polypolish-careful__pypolca.fasta polypolish__pypolca-careful.fasta
