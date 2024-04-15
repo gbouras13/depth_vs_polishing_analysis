@@ -1,0 +1,124 @@
+---
+title: "Low-depth Illumina polishing - low quality draft assemblies"
+date: "2024-04-10"
+author: "Ryan Wick, George Bouras"
+output:
+  html_document:
+    pandoc_args: ["+RTS", "-K64m", "-RTS", "--self-contained",]
+    df_print: paged
+    keep_md: false
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+```{r collapse=TRUE}
+library(tidyverse)
+library(knitr)
+library(readr)
+library(dplyr)
+library(cowplot)
+
+plot_dir <- "plots"
+dir.create(plot_dir)
+
+opts_chunk$set(dpi=300, fig.path='plots/', echo=TRUE, dev=c('png','pdf'), warning=FALSE, message=FALSE)
+pdf.options(useDingbats = FALSE)
+```
+
+
+Load data from `results_low_quality.tsv` and process it a bit. I add a column which contains the number of errors in the draft (pre-Illumina-polish) genomes:
+```{r load_data}
+per_genome_results <- read_delim("results.tsv", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
+colnames(per_genome_results) <- c("genome", "depth", "polishing", "errors")
+per_genome_results$depth <- as.numeric(per_genome_results$depth)
+per_genome_results <- per_genome_results %>% pivot_wider(names_from = polishing, values_from = errors)
+
+per_genome_results <- per_genome_results %>%
+  mutate(before_polish = case_when(
+    genome == "ATCC_10708_Salmonella_enterica" ~ 4132,
+    genome == "ATCC_14035_Vibrio_cholerae" ~ 4664,
+    genome == "ATCC_17802_Vibrio_parahaemolyticus" ~ 4202,
+    genome == "ATCC_19119_Listeria_ivanovii" ~ 936,
+    genome == "ATCC_25922_Escherichia_coli" ~ 5510,
+    genome == "ATCC_33560_Campylobacter_jejuni" ~ 2538,
+    genome == "ATCC_35221_Campylobacter_lari" ~ 2739,
+    genome == "ATCC_35897_Listeria_welshimeri" ~ 668,
+    genome == "ATCC_BAA-679_Listeria_monocytogenes" ~ 795))
+```
+
+Make a dataframe with the error counts totalled over all nine genomes:
+```{r totals}
+introduced <- per_genome_results
+introduced$Polypolish_introduced <- ifelse(introduced$Polypolish - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`Polypolish-careful_introduced` <- ifelse(introduced$`Polypolish-careful` - introduced$before_polish > 0, TRUE, FALSE)
+introduced$pypolca_introduced <- ifelse(introduced$pypolca - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`pypolca-careful_introduced` <- ifelse(introduced$`pypolca-careful` - introduced$before_polish > 0, TRUE, FALSE)
+introduced$HyPo_introduced <- ifelse(introduced$HyPo - introduced$before_polish > 0, TRUE, FALSE)
+introduced$FMLRC2_introduced <- ifelse(introduced$FMLRC2 - introduced$before_polish > 0, TRUE, FALSE)
+introduced$NextPolish_introduced <- ifelse(introduced$NextPolish - introduced$before_polish > 0, TRUE, FALSE)
+introduced$Pilon_introduced <- ifelse(introduced$Pilon - introduced$before_polish > 0, TRUE, FALSE)
+
+
+total_results <- introduced %>%
+  group_by(depth) %>%
+  summarise(before_polish = sum(before_polish),
+            polypolish_errors = sum(Polypolish),
+            polypolish_introduced = any(Polypolish_introduced),
+            polypolish_careful_errors = sum(`Polypolish-careful`),
+            polypolish_careful_introduced = any(`Polypolish-careful_introduced`),
+            pypolca_errors = sum(pypolca),
+            pypolca_introduced = any(pypolca_introduced),
+            pypolca_careful_errors = sum(`pypolca-careful`),
+            pypolca_careful_introduced = any(`pypolca-careful_introduced`),
+            hypo_errors = sum(HyPo),
+            hypo_introduced = any(HyPo_introduced),
+            fmlrc2_errors = sum(FMLRC2),
+            fmlrc2_introduced = any(FMLRC2_introduced),
+            nextpolish_errors = sum(NextPolish),
+            nextpolish_introduced = any(NextPolish_introduced),
+            pilon_errors = sum(Pilon),
+            pilon_introduced = any(Pilon_introduced))
+```
+
+
+```{r plot, fig.width = 10, fig.height = 12}
+plot_full_range <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE) {
+  mean_40_and_up <- total_results %>% filter(depth >= 40.0) %>% summarise(median(!!sym(column_name)))
+  mean_40_and_up <- mean_40_and_up[[1]]
+
+  introduced_column <- gsub("_errors", "_introduced", column_name)
+  max_y <- max(total_results[[column_name]], na.rm = TRUE) * 1.05
+  p <- ggplot(total_results, aes(x=depth,y=!!sym(column_name),colour=!!sym(introduced_column) )) +
+    geom_hline(yintercept = 26185, color="#3A3A3A", linetype = "dashed") +
+    geom_point(size = 1.25, colour = "#662929") +
+    annotate("text", label=mean_40_and_up, x=45, y=max_y/11, colour="#AF0000", lineheight = 0.9) +
+    theme_bw() + theme(legend.position = "none") +
+    scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, max_y), expand = c(0, 0)) +
+    labs(title=polisher_name, x="Illumina depth", y="Errors")
+  if (no_x) {
+    p <- p + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+  }
+  if (no_y) {
+    p <- p + theme(axis.title.y=element_blank())
+  }
+  return(p)
+}
+
+p1 <- plot_full_range("polypolish_errors", "Polypolish-default", FALSE, FALSE)
+p2 <- plot_full_range("pypolca_errors", "Pypolca-default", FALSE, TRUE)
+p3 <- plot_full_range("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE)
+p4 <- plot_full_range("pypolca_careful_errors", "Pypolca-careful", FALSE, TRUE)
+p5 <- plot_full_range("fmlrc2_errors", "FMLRC2", FALSE, FALSE)
+p6 <- plot_full_range("hypo_errors", "HyPo", FALSE, TRUE)
+p7 <- plot_full_range("nextpolish_errors", "NextPolish", FALSE, FALSE)
+p8 <- plot_full_range("pilon_errors", "Pilon", FALSE, TRUE)
+
+jpeg(file = paste(plot_dir, "low_quality_draft.jpeg", sep = "/" ), units = "in",
+     width = 10,
+     height = 12, bg = "transparent", res = 600)
+
+plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
+dev.off()
+```
+
