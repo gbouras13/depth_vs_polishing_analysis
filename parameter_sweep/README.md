@@ -1,10 +1,8 @@
-This analysis does a parameter sweep for each polisher, trying to find a set of parameters that does well with low-depth polishing. For this test, I used only the _Campylobacter lari_ genome, because it was the smallest genome (so fastest to run) and had the highest density of pre-polishing errors. I also just tested four depths (5x, 10x, 15x and 20x) to save time. Parameters were ranked on the total number of remaining errors across those four depths. Since the _Campylobacter lari_ genome had 18 errors, a polisher that did nothing would result in a total of 72 errors.
+This analysis does a parameter sweep for each polisher, trying to find a set of parameters that works well with low-depth polishing. For this test, I used only the _Campylobacter lari_ genome, because it was the smallest genome in this study (so fastest to run) and had the highest density of pre-polishing errors. I also just tested four depths (5x, 10x, 15x and 20x) to save time. Parameters were ranked on the total number of remaining errors across those four depths. Since the _Campylobacter lari_ genome had 18 errors, a polisher that did nothing would result in a total of 72 errors.
 
-Each parameter sweep is done by a Python script. The script first tries the default parameters, and if the documentation/publication suggests any alternative parameters (e.g. 'eukaryote mode' in FMLRC2), then it tries those also. Then it alternates between trying a random set of parameters and a mutated set of parameters. Mutated parameters start with the best set since so far and adjust the values slightly. A total of 1000 parameter sets were tried for each tool.
+Each parameter sweep is done by a Python script. The script first tries the default parameters, and if the documentation/publication suggests any alternative parameters (e.g. 'careful' for Polypolish and 'eukaryote mode' for FMLRC2), then it tries those also. Then it alternates between trying a random set of parameters and a mutated set of parameters. Mutated parameters start with the best set seen so far and adjust the values slightly. A total of 1000 parameter sets are tried for each tool.
 
 For each tool, I did my best to decide which parameters were relevant and which weren't, and only search relevant parameters. For example, a minimum-depth parameter would be relevant but a thread-count parameter would not. I also did my best to test each parameter in a range which makes sense, e.g. a 'depth' parameter might range from 0-50, while a 'fraction' parameter might range from 0-1.
-
-Often, a tool had multiple similar parameter sets which tied for the best. To get a single 'best' set, I did my best to take a median set. E.g. if the best sets had a parameter with values 0.21, 0.22 or 0.23, I would use the set with 0.22.
 
 
 
@@ -38,7 +36,6 @@ nextpolish_dir=/home/wickr/programs/NextPolish
 ## Create directories
 
 ```bash
-base_dir=/home/wickr/2024-01_low-depth_Illumina_polishing
 cd "$base_dir"
 mkdir parameter_sweep
 
@@ -86,7 +83,6 @@ cd "$base_dir"/parameter_sweep/fmlrc2
 conda activate assembly
 ./fmlrc2.py
 rm comp_msbwt_* fmlrc2.fasta
-cat results.tsv | sort -t$'\t' -nk8,8 | head -n2
 ```
 Best parameters: `-k 27 -m 0 -f 0.29`
 Best total: 26
@@ -100,7 +96,6 @@ cd "$base_dir"/parameter_sweep/hypo
 conda activate hypo
 ./hypo.py
 rm alignments_*.bam* read_filenames_*.txt hypo.fasta
-cat results.tsv | sort -t$'\t' -nk8,8 | head -n2
 ```
 Best parameters: `-m 5 -x -5 -g -8 -n 20 -q 41`
 Best total: 102
@@ -116,7 +111,6 @@ cd "$base_dir"/parameter_sweep/nextpolish
 conda activate nextpolish
 ./nextpolish.py
 rm sgs.sort_*.bam*
-cat results.tsv | sort -t$'\t' -nk8,8 | head -n2
 ```
 Best parameters: `-min_map_quality 1 -max_ins_fold_sgs 7 -max_clip_ratio_sgs 0 -trim_len_edge 0 -ext_len_edge 0 -indel_balance_factor_sgs 0.63 -min_count_ratio_skip 0.55 -max_len_kmer 35 -min_len_inter_kmer 5 -max_count_kmer 47`
 Best total: 596
@@ -130,7 +124,6 @@ cd "$base_dir"/parameter_sweep/pilon
 conda activate pilon
 ./pilon.py
 rm alignments_*.bam*
-cat results.tsv | sort -t$'\t' -nk8,8 | head -n2
 ```
 Best parameters: `--fix bases --flank 3 --K 51 --mindepth 3 --minmq 58 --minqual 15`
 Best total: 19
@@ -146,7 +139,6 @@ cd "$base_dir"/parameter_sweep/polypolish
 conda activate assembly
 ./polypolish.py
 rm *.sam polypolish.fasta
-cat results.tsv | sort -t$'\t' -nk8,8 | head -n2
 ```
 Best parameters: `-i 0.42 -v 0.68 -m 3 -d 3`
 Best total: 17
@@ -159,21 +151,9 @@ Best total: 17
 cd "$base_dir"/parameter_sweep/pypolca
 conda activate assembly
 ./pypolca.py
-cat results.tsv | sort -t$'\t' -nk8,8 | head -n2
 ```
 Best parameters: `--min_alt 3 --min_ratio 3.5`
 Best total: 14
-
-
-
-## Best total for each tool
-
-* Polypolish:  17
-* Pypolca:     14
-* FMLRC2:      26
-* HyPo:       102
-* NextPolish: 596
-* Pilon:       19
 
 
 
@@ -197,5 +177,5 @@ tail -n+2 pypolca/results.tsv >> results.tsv
 * HyPo was not that tunable, with 'best' parameters barely better than defaults.
 * The other three tools (NextPolish, Polypolish and Pypolca) were somewhat tunable - their 'best' parameters did better than defaults but not drastically so.
 * Pypolca and Polypolish were still the best low-depth polishers after tuning, though Pilon and FMLRC2 did nearly as well.
-* This parameter sweep is almost certainly overfitting to our data: _C. lari_, 18 errors, 5-20x depth.
-* This sweep wasn't exhaustive. Especially for the higher-parameter tools (e.g. NextPolish) there could be even better parameter sets that I missed.
+* This parameter sweep is probably overfitting to our data (_C. lari_, 18 errors, 5-20x depth), so the results do not necessarily represent the best parameters for low-depth polishing in general.
+* This sweep wasn't exhaustive. Especially for tools with many parameters (e.g. NextPolish) there could be even better parameter sets that I missed.
