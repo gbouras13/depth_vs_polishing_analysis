@@ -10,7 +10,8 @@ Contents:
 * `errors_in_repeats`: contains the details of the errors-in-repeats analysis shown in Figure S1.
 * `long_homopolymer`: contains the details of the long-homopolymer analysis shown in Figure S4.
 * `parameter_sweep`: contains the details of the low-depth parameter sweep analysis shown in Table S5.
-* `low_quality_draft`: contains the details of the polishing analysis using low-quality draft assemblies show in Figure S10.
+* `error_characterisation`: contains the detailed error characterisation of the 37 existing errors and all polisher introduced errors. The analysis is shown in Table S6 and Figures S8 and S9.
+* `low_quality_draft`: contains the details of the polishing analysis using low-quality draft assemblies shown in Figure S10.
 * `Figures`: contains all of the manuscript's man and supplementary figures.
 * `supp_tables.xlsx`: contains the paper's supplementary tables.
 * `hybracter_analysis`: contains the read subsampling assembly and plotting commands for the [Hybracter](https://github.com/gbouras13/hybracter) analysis in the paper (Figures S6 and S7).
