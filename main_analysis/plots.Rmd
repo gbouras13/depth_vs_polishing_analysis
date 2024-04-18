@@ -103,6 +103,17 @@ total_results <- introduced %>%
             pypolca_polypolish_careful_introduced = any(`pypolca+Polypolish-careful_introduced`))
 ```
 
+
+```{r totals}
+introduced_df <- introduced
+
+colnames(introduced_df) <- gsub("_introduced", "_overall_decreased_accuracy", colnames(introduced_df) )
+
+write.csv(introduced_df, file = "all_depths_errors.csv")
+
+
+```
+
 Plot the total errors vs Illumina depth for each polisher and polisher combination. These plots cap the y-axis at 45 and indicate peak errors with text as necessary:
 ```{r single_tool_plots, fig.width = 10, fig.height = 12}
 plot_to_45 <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE, include_colour = FALSE) {

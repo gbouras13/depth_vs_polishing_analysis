@@ -80,7 +80,7 @@ def main():
 
     ont_errors = pd.read_csv(args.csv, sep = ",")
 
-    existing_error_list = ont_errors['ref'].to_list()
+    existing_errors = set(ont_errors['ref'].to_list())
 
     # Generate list of floats
 
@@ -152,22 +152,23 @@ def main():
                                 print('Error number', count_errors)
                                 print('Error type', error_type)
 
-                                ref = f"{genome}_{chrom_region}"
+                                ref = f"{genome} {chrom_region}"
 
-                                if ref in existing_error_list:
+                                if ref in existing_errors:
                                     existing_flag = True
                                 else:
                                     existing_flag = False
 
                                 # specifically if the error is a triple deletion/double -> smaller deletion, mark that as existing
-                                if chrom_region == "chromosome 548172-548202": # triple
-                                    existing_flag -True
-                                elif chrom_region == "chromosome 148684-148714": #double
-                                    existing_flag -True
-                                elif chrom_region == "chromosome 2671889-2671920": # 3 -> 2
-                                    existing_flag -True
-                                elif chrom_region == "chromosome 2671890-2671920": # 3 -> 1
-                                    existing_flag -True
+                                # I have checked these manually too
+                                if genome == "ATCC_35221_Campylobacter_lari" and chrom_region == "chromosome 548172-548202": # triple
+                                    existing_flag = True
+                                elif genome == "ATCC_33560_Campylobacter_jejuni" and chrom_region == "chromosome 148684-148714": #double
+                                    existing_flag = True
+                                elif  genome == "ATCC_19119_Listeria_ivanovii" and chrom_region == "chromosome 2671889-2671920": # 3 -> 2
+                                    existing_flag = True
+                                elif genome == "ATCC_19119_Listeria_ivanovii" and chrom_region == "chromosome 2671890-2671920": # 3 -> 1
+                                    existing_flag = True
 
 
                                 entry = {'genome': genome,
