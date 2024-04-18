@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+error_characterisation/assemblies
+error_characterisation/assemblies/*
+
 # C extensions
 *.so
 

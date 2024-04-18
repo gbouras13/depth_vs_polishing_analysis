@@ -1,0 +1,279 @@
+---
+title: "Low-depth Illumina polishing error characterisation"
+date: "2024-04-17"
+author: "Ryan Wick, George Bouras"
+output:
+  html_document:
+    pandoc_args: ["+RTS", "-K64m", "-RTS", "--self-contained",]
+    df_print: paged
+    keep_md: false
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+```{r collapse=TRUE}
+library(tidyverse)
+library(knitr)
+library(readr)
+library(dplyr)
+library(cowplot)
+
+plot_dir <- "plots"
+dir.create(plot_dir)
+
+opts_chunk$set(dpi=300, fig.path='plots/', echo=TRUE, dev=c('png','pdf'), warning=FALSE, message=FALSE)
+pdf.options(useDingbats = FALSE)
+```
+
+
+Load data from `analysed_output/aggregated_output.csv`.
+
+```{r load_data}
+per_genome_results <- read_delim("analysed_output/aggregated_output.csv", delim = ",", escape_double = FALSE, trim_ws = TRUE)
+
+per_genome_results$total_error <- per_genome_results$Existing + per_genome_results$Introduced
+
+per_genome_results_introduced_df <- per_genome_results %>% dplyr::select(polisher,
+                                                                         depth,
+                                                                         Existing,
+                                                                         Introduced,
+                                                                         total_error
+                                                                         )
+
+
+per_genome_results_introduced_df <- per_genome_results_introduced_df %>% pivot_longer(
+                        cols = c("Existing", "Introduced"),
+                        names_to = "Error",
+                        values_to = "Count")
+
+per_genome_results_type_df <- per_genome_results %>% dplyr::select(polisher,
+                                                                         depth,
+                                                                   total_SNP_errors, total_Deletion_errors,total_Insertion_errors,total_Mixed_errors,total_error
+                                                                         )
+
+colnames(per_genome_results_type_df)[3:6] <- c("SNP","Deletion", "Insertion","Mixed")
+
+
+per_genome_results_type_df <- per_genome_results_type_df %>% pivot_longer(
+                        cols = c("SNP","Deletion", "Insertion","Mixed"),
+                        names_to = "Error",
+                        values_to = "Count")
+
+
+```
+
+Plot the total errors vs Illumina depth for each polisher and polisher combination. These plots cap the y-axis at 45 and indicate peak errors with text as necessary:
+
+```{r single_tool_plots, fig.width = 10, fig.height = 12}
+plot_full_range <- function(polisher_name, 
+                       no_x = FALSE, 
+                       no_y = FALSE, 
+                       include_colour = FALSE) {
+  if (include_colour) {
+    colours <- scale_colour_manual(values = c("Existing" = "#127EAD", "Introduced" = "#CC0000"))
+  } else {
+    colours <- scale_colour_manual(values = c("Existing" = "#662929", "Introduced" = "#662929"))
+  }
+  
+  df <- per_genome_results_introduced_df %>% 
+                dplyr::filter(polisher == polisher_name )
+  
+  introduced_df <- df %>% 
+    filter(Error == "Introduced")
+  
+  existing_df <- df %>% 
+    filter(Error == "Existing")
+  
+  
+  peak_index <- which.max(introduced_df$Count)
+  peak_errors <- introduced_df$Count[peak_index]
+  peak_depth <- introduced_df$depth[peak_index]
+  
+  min_index <- which.min(existing_df$Count)
+  min_errors <- existing_df$Count[min_index]
+  min_depth <- existing_df$depth[min_index]
+  
+  if (peak_errors ==1 ){
+  peak_label = paste("peak introduced:\n", peak_errors, " error",  sep="")
+  }
+  else {
+   peak_label = paste("peak introduced:\n", peak_errors, " errors",  sep="")   
+  }
+  
+  min_label = paste("min existing:\n", min_errors, " errors\n", sep="")   
+  
+  max_y <- 100
+
+  p <- ggplot(per_genome_results_introduced_df %>% 
+                dplyr::filter(polisher == polisher_name ), 
+              aes(x=depth, y=Count, colour=Error )) +
+    geom_hline(yintercept = 37, color="#3A3A3A", linetype = "dashed") +
+    geom_point(size=1.25) + colours +
+    theme_bw() + theme(legend.position = "none") +
+    scale_x_continuous(limits = c(25, 50), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, max_y), expand = c(0, 0)) +
+    labs(title=polisher_name, x="Illumina depth", y="Errors")
+  if (peak_errors >= 0) {
+    p <- p + annotate("text", label=peak_label, x=45.5, y=81.3, colour="#CC0000", lineheight = 0.9)
+  }
+      p <- p + annotate("text", label=min_label, x=45.5, y=61.3, colour="#127EAD", lineheight = 0.9)
+  if (no_x) {
+    p <- p + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+  }
+  if (no_y) {
+    p <- p + theme(axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
+  }
+  return(p)
+}
+
+include_colours = TRUE
+
+
+
+p1 <- plot_full_range("polypolish", FALSE, FALSE, include_colours)
+p2 <- plot_full_range("pypolca", FALSE, TRUE, include_colours)
+p3 <- plot_full_range("polypolish-careful", FALSE, FALSE, include_colours)
+p4 <- plot_full_range("pypolca-careful", FALSE, TRUE, include_colours)
+p5 <- plot_full_range("fmlrc2", FALSE, FALSE, include_colours)
+p6 <- plot_full_range("hypo", FALSE, TRUE, include_colours)
+p7 <- plot_full_range("nextpolish", FALSE, FALSE, include_colours)
+p8 <- plot_full_range("pilon", FALSE, TRUE, include_colours)
+
+jpeg(file = paste(plot_dir, "Supp_Figure8.jpeg", sep = "/" ), units = "in",
+     width = 10,
+     height = 12, bg = "transparent", res = 600)
+
+plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
+dev.off()
+
+```
+
+Plot insertions, deletions, SNPs and mixed 
+
+```{r single_tool_plots, fig.width = 10, fig.height = 12}
+
+
+plot_by_type <- function(polisher_name, 
+                       no_x = FALSE, 
+                       no_y = FALSE) {
+
+    colours <- scale_colour_manual(values = c("SNP" = "#1f78b4", "Insertion" = "#ff7f0e", "Deletion"= "#33a02c", "Mixed" = "#6a3d9a"))
+  
+  df <- per_genome_results_type_df %>% 
+                dplyr::filter(polisher == polisher_name )
+  
+  snp_df <- df %>%
+    filter(Error == "SNP")
+  
+  snp_index <- which.max(snp_df$Count)
+  snp_errors <- snp_df$Count[snp_index]
+  snp_depth <- snp_df$depth[snp_index]
+
+  insertion_df <- df %>%
+    filter(Error == "Insertion")
+  
+  insertion_index <- which.max(insertion_df$Count)
+  insertion_errors <- snp_df$Count[insertion_index]
+  insertion_depth <- snp_df$depth[insertion_index]
+  
+  deletion_df <- df %>%
+    filter(Error == "Deletion")
+  
+  deletion_index <- which.max(deletion_df$Count)
+  deletion_errors <- deletion_df$Count[deletion_index]
+  deletion_depth <- deletion_df$depth[deletion_index]
+
+  mixed_df <- df %>%
+    filter(Error == "Mixed")
+
+  mixed_index <- which.max(mixed_df$Count)
+  mixed_errors <- mixed_df$Count[mixed_index]
+  mixed_depth <- mixed_df$depth[mixed_index]
+  
+  if (snp_errors == 1){
+    snp_label = paste("peak SNPs:\n", snp_errors, " error",  sep="")
+  } else{
+    snp_label = paste("peak SNPs:\n", snp_errors, " errors",  sep="")
+  }
+  
+    if (insertion_errors == 1){
+     insertion_label = paste("peak insertions:\n", insertion_errors, " error",  sep="")
+  } else{
+     insertion_label = paste("peak insertions:\n", insertion_errors, " errors",  sep="")
+  }
+  
+    if (deletion_errors == 1){
+     deletion_label = paste("peak deletions:\n", deletion_errors, " error",  sep="")
+  } else{
+     deletion_label = paste("peak deletions:\n", deletion_errors, " errors",  sep="")
+  }
+  
+    if (mixed_errors == 1){
+     mixed_label = paste("peak mixed errors:\n", mixed_errors, " error",  sep="")
+  } else{
+     mixed_label = paste("peak mixed errors:\n", mixed_errors, " errors",  sep="")
+  }
+  
+
+  # if (peak_errors <2 ){
+  # peak_label = paste("peak introduced:\n", peak_errors, " error",  sep="")
+  # }
+  # else {
+  #  peak_label = paste("peak introduced:\n", peak_errors, " errors",  sep="")   
+  # }
+  # 
+  # min_label = paste("min existing:\n", min_errors, " errors\n", sep="")   
+  # 
+  max_y <- 100
+
+  p <- ggplot(per_genome_results_type_df %>% 
+                dplyr::filter(polisher == polisher_name ), 
+              aes(x=depth, y=Count, colour=Error )) +
+    geom_hline(yintercept = 37, color="#3A3A3A", linetype = "dashed") +
+    geom_point(size=1.25) + colours +
+    theme_bw() + theme(legend.position = "none") +
+    scale_x_continuous(limits = c(25, 50), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, max_y), expand = c(0, 0)) +
+    labs(title=polisher_name, x="Illumina depth", y="Errors")
+
+  
+
+      p <- p + annotate("text", label=snp_label, x=45.5, y=92.3, colour="#1f78b4", lineheight = 0.9)
+      
+    p <- p + annotate("text", label=insertion_label, x=45.5, y=77.3, colour="#ff7f0e", lineheight = 0.9)
+
+    p <- p + annotate("text", label=deletion_label, x=45.5, y=62.3, colour="#33a02c", lineheight = 0.9)
+    
+        p <- p + annotate("text", label=mixed_label, x=45.5, y=47.3, colour="#6a3d9a", lineheight = 0.9)
+      
+      
+  if (no_x) {
+    p <- p + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+  }
+  if (no_y) {
+    p <- p + theme(axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
+  }
+  return(p)
+}
+
+
+
+
+
+p1 <- plot_by_type("polypolish", FALSE, FALSE )
+p2 <- plot_by_type("pypolca", FALSE, TRUE)
+p3 <- plot_by_type("polypolish-careful", FALSE, FALSE)
+p4 <- plot_by_type("pypolca-careful", FALSE, TRUE)
+p5 <- plot_by_type("fmlrc2", FALSE, FALSE)
+p6 <- plot_by_type("hypo", FALSE, TRUE)
+p7 <- plot_by_type("nextpolish", FALSE, FALSE)
+p8 <- plot_by_type("pilon", FALSE, TRUE)
+
+jpeg(file = paste(plot_dir, "Supp_Figure9.jpeg", sep = "/" ), units = "in",
+     width = 10,
+     height = 12, bg = "transparent", res = 600)
+
+plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
+dev.off()
+
+```
