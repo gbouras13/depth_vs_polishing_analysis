@@ -1,0 +1,6 @@
+	index	Motif	Motif_raw	Methylation_type	Genome_sites	Methylated_sites	Methylation_coverage	Average_Percent_Methylation_per_site	Methylated_position_1	Methylated_position_1_percent	Methylated_position_2	Methylated_position_2_percent
+0	0	RAAWTTY	1-WDWWRAAWTTYWWHW	6mA	17992	17992	1.0	0.95	4	49.269	3	24.832
+1	1	KGATCM	4-WNAKGATCMTNW	6mA	1988	1964	0.988	0.85	3	48.88	4	48.88
+2	2	CAANNNNNWTRG	2-CAARWNNWWTRG	6mA	1338	1338	1.0	0.88	3	44.358	10	43.986
+3	3	GAATTC	3-WDDADGAATTCHTHHW	6mA	474	474	1.0	0.92	3	49.894	4	49.894
+4	4	No Motif Assigned	NA	6mA	NA	13814	NA	0.89	NA	NA	NA	NA

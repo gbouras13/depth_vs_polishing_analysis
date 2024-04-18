@@ -10,10 +10,10 @@ Contents:
 * `errors_in_repeats`: contains the details of the errors-in-repeats analysis shown in Figure S1.
 * `long_homopolymer`: contains the details of the long-homopolymer analysis shown in Figure S4.
 * `parameter_sweep`: contains the details of the low-depth parameter sweep analysis shown in Table S5.
-* `low_quality_draft`: contains the details of the polishing analysis using low-quality draft assemblies show in Figure S8.
+* `low_quality_draft`: contains the details of the polishing analysis using low-quality draft assemblies show in Figure S10.
 * `Figures`: contains all of the manuscript's man and supplementary figures.
 * `supp_tables.xlsx`: contains the paper's supplementary tables.
-* `hybracter_analysis`: contains the read subsampling assembly and plotting commands for the [Hybracter]() analysis in the paper (Figures S6 and S7).
+* `hybracter_analysis`: contains the read subsampling assembly and plotting commands for the [Hybracter](https://github.com/gbouras13/hybracter) analysis in the paper (Figures S6 and S7).
 * `pypolca_example_plot`: contains code to simulate reads, errors and make Figure 1.
 
 ONT and Illumina reads are not included in this repository due to size, but they can be found on SRA:

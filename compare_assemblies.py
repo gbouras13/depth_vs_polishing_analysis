@@ -23,7 +23,7 @@ import argparse
 import datetime
 import edlib
 import gzip
-import mappy
+# import mappy
 import os
 import re
 import pathlib
