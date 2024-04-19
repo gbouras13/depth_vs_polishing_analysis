@@ -9,8 +9,8 @@ Contents:
 * `reference_chromosome_assemblies_hybracter`: contains the polished and manually curated assemblies used as a ground truth, chromosomes only. Used for the Hybracter analysis.
 * `errors_in_repeats`: contains the details of the errors-in-repeats analysis shown in Figure S1.
 * `long_homopolymer`: contains the details of the long-homopolymer analysis shown in Figure S4.
-* `parameter_sweep`: contains the details of the low-depth parameter sweep analysis shown in Table S5.
-* `error_characterisation`: contains the detailed error characterisation of the 37 existing errors and all polisher introduced errors. The analysis is shown in Table S6 and Figures S8 and S9.
+* `parameter_sweep`: contains the details of the low-depth parameter sweep analysis shown in Table S6.
+* `error_characterisation`: contains the detailed error characterisation of the 37 existing errors and all polisher introduced errors. The analysis is shown in Table S2 and Figures S8 and S9.
 * `low_quality_draft`: contains the details of the polishing analysis using low-quality draft assemblies shown in Figure S10.
 * `Figures`: contains all of the manuscript's man and supplementary figures.
 * `supp_tables.xlsx`: contains the paper's supplementary tables.
