@@ -83,15 +83,15 @@ total_results <- introduced %>%
 
 ```{r plot, fig.width = 10, fig.height = 12}
 plot_full_range <- function(column_name, polisher_name, no_x = FALSE, no_y = FALSE) {
-  mean_40_and_up <- total_results %>% filter(depth >= 40.0) %>% summarise(median(!!sym(column_name)))
-  mean_40_and_up <- mean_40_and_up[[1]]
+  mean_25_and_up <- total_results %>% filter(depth >= 25.0) %>% summarise(median(!!sym(column_name)))
+  mean_25_and_up <- mean_25_and_up[[1]]
 
   introduced_column <- gsub("_errors", "_introduced", column_name)
   max_y <- max(total_results[[column_name]], na.rm = TRUE) * 1.05
   p <- ggplot(total_results, aes(x=depth,y=!!sym(column_name),colour=!!sym(introduced_column) )) +
     geom_hline(yintercept = 26185, color="#3A3A3A", linetype = "dashed") +
     geom_point(size = 1.25, colour = "#662929") +
-    annotate("text", label=mean_40_and_up, x=45, y=max_y/11, colour="#AF0000", lineheight = 0.9) +
+    annotate("text", label=mean_25_and_up, x=37.5, y=max_y/11, colour="#AF0000", lineheight = 0.9) +
     theme_bw() + theme(legend.position = "none") +
     scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, max_y), expand = c(0, 0)) +
