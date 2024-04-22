@@ -93,7 +93,7 @@ cj_plot <- generate_plot("ATCC_33560_Campylobacter_jejuni", 5, "ATCC 33560", "Ca
 lm_plot <- generate_plot("ATCC_BAA-679_Listeria_monocytogenes", 0, "ATCC BAA-679", "Listeria monocytogenes")
 
 
-jpeg(file = paste(plot_dir, "Supp_Figure6.jpeg", sep = "/" ), units = "in", 
+jpeg(file = paste(plot_dir, "Supp_Figure8.jpeg", sep = "/" ), units = "in", 
      width = 9, 
      height = 16, bg = "transparent", res = 600)
 
@@ -223,7 +223,7 @@ grid <- plot_grid(
 
 
 
-jpeg(file = paste(plot_dir, "SuppFig4.jpeg", sep = "/" ), units = "in", 
+jpeg(file = paste(plot_dir, "Supp_Figure9.jpeg", sep = "/" ), units = "in", 
      width = 9, 
      height = 16, bg = "transparent", res = 600)
 

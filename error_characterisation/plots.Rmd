@@ -33,6 +33,25 @@ per_genome_results <- read_delim("analysed_output/aggregated_output.csv", delim 
 
 per_genome_results$total_error <- per_genome_results$Existing + per_genome_results$Introduced
 
+# to make the names match Figure 2
+per_genome_results$polisher <- gsub("fmlrc2", "FMLRC2", per_genome_results$polisher )
+
+per_genome_results$polisher <- gsub("hypo", "HyPo", per_genome_results$polisher )
+
+per_genome_results$polisher <- gsub("pilon", "Pilon", per_genome_results$polisher )
+
+per_genome_results$polisher <- gsub("nextpolish", "NextPolish", per_genome_results$polisher )
+
+
+per_genome_results$polisher <- gsub("polypolish-careful", "Polypolish-careful", per_genome_results$polisher )
+
+per_genome_results$polisher <- gsub("polypolish", "Polypolish-default", per_genome_results$polisher )
+
+per_genome_results$polisher <- gsub("pypolca-careful", "Pypolca-careful", per_genome_results$polisher )
+
+per_genome_results$polisher <- gsub("pypolca", "Pypolca-default", per_genome_results$polisher )
+
+
 per_genome_results_introduced_df <- per_genome_results %>% dplyr::select(polisher,
                                                                          depth,
                                                                          Existing,
@@ -51,13 +70,15 @@ per_genome_results_type_df <- per_genome_results %>% dplyr::select(polisher,
                                                                    total_SNP_errors, total_Deletion_errors,total_Insertion_errors,total_Mixed_errors,total_error
                                                                          )
 
-colnames(per_genome_results_type_df)[3:6] <- c("SNP","Deletion", "Insertion","Mixed")
+colnames(per_genome_results_type_df)[3:6] <- c("Substitution","Deletion", "Insertion","Mixed")
 
 
 per_genome_results_type_df <- per_genome_results_type_df %>% pivot_longer(
-                        cols = c("SNP","Deletion", "Insertion","Mixed"),
+                        cols = c("Substitution","Deletion", "Insertion","Mixed"),
                         names_to = "Error",
                         values_to = "Count")
+
+
 
 
 ```
@@ -130,16 +151,16 @@ include_colours = TRUE
 
 
 
-p1 <- plot_full_range("polypolish", FALSE, FALSE, include_colours)
-p2 <- plot_full_range("pypolca", FALSE, TRUE, include_colours)
-p3 <- plot_full_range("polypolish-careful", FALSE, FALSE, include_colours)
-p4 <- plot_full_range("pypolca-careful", FALSE, TRUE, include_colours)
-p5 <- plot_full_range("fmlrc2", FALSE, FALSE, include_colours)
-p6 <- plot_full_range("hypo", FALSE, TRUE, include_colours)
-p7 <- plot_full_range("nextpolish", FALSE, FALSE, include_colours)
-p8 <- plot_full_range("pilon", FALSE, TRUE, include_colours)
+p1 <- plot_full_range("Polypolish-default", FALSE, FALSE, include_colours)
+p2 <- plot_full_range("Pypolca-default", FALSE, TRUE, include_colours)
+p3 <- plot_full_range("Polypolish-careful", FALSE, FALSE, include_colours)
+p4 <- plot_full_range("Pypolca-careful", FALSE, TRUE, include_colours)
+p5 <- plot_full_range("FMLRC2", FALSE, FALSE, include_colours)
+p6 <- plot_full_range("HyPo", FALSE, TRUE, include_colours)
+p7 <- plot_full_range("NextPolish", FALSE, FALSE, include_colours)
+p8 <- plot_full_range("Pilon", FALSE, TRUE, include_colours)
 
-jpeg(file = paste(plot_dir, "Supp_Figure8.jpeg", sep = "/" ), units = "in",
+jpeg(file = paste(plot_dir, "Supp_Figure5.jpeg", sep = "/" ), units = "in",
      width = 10,
      height = 12, bg = "transparent", res = 600)
 
@@ -148,7 +169,7 @@ dev.off()
 
 ```
 
-Plot insertions, deletions, SNPs and mixed 
+Plot insertions, deletions, Substitutions and mixed 
 
 ```{r single_tool_plots, fig.width = 10, fig.height = 12}
 
@@ -157,24 +178,24 @@ plot_by_type <- function(polisher_name,
                        no_x = FALSE, 
                        no_y = FALSE) {
 
-    colours <- scale_colour_manual(values = c("SNP" = "#1f78b4", "Insertion" = "#ff7f0e", "Deletion"= "#33a02c", "Mixed" = "#6a3d9a"))
+    colours <- scale_colour_manual(values = c("Substitution" = "#1f78b4", "Insertion" = "#ff7f0e", "Deletion"= "#33a02c", "Mixed" = "#6a3d9a"))
   
   df <- per_genome_results_type_df %>% 
                 dplyr::filter(polisher == polisher_name )
   
-  snp_df <- df %>%
-    filter(Error == "SNP")
+  Substitution_df <- df %>%
+    filter(Error == "Substitution")
   
-  snp_index <- which.max(snp_df$Count)
-  snp_errors <- snp_df$Count[snp_index]
-  snp_depth <- snp_df$depth[snp_index]
+  Substitution_index <- which.max(Substitution_df$Count)
+  Substitution_errors <- Substitution_df$Count[Substitution_index]
+  Substitution_depth <- Substitution_df$depth[Substitution_index]
 
   insertion_df <- df %>%
     filter(Error == "Insertion")
   
   insertion_index <- which.max(insertion_df$Count)
-  insertion_errors <- snp_df$Count[insertion_index]
-  insertion_depth <- snp_df$depth[insertion_index]
+  insertion_errors <- Substitution_df$Count[insertion_index]
+  insertion_depth <- Substitution_df$depth[insertion_index]
   
   deletion_df <- df %>%
     filter(Error == "Deletion")
@@ -190,10 +211,10 @@ plot_by_type <- function(polisher_name,
   mixed_errors <- mixed_df$Count[mixed_index]
   mixed_depth <- mixed_df$depth[mixed_index]
   
-  if (snp_errors == 1){
-    snp_label = paste("peak SNPs:\n", snp_errors, " error",  sep="")
+  if (Substitution_errors == 1){
+    Substitution_label = paste("peak substitutions:\n", Substitution_errors, " error",  sep="")
   } else{
-    snp_label = paste("peak SNPs:\n", snp_errors, " errors",  sep="")
+    Substitution_label = paste("peak substitutions:\n", Substitution_errors, " errors",  sep="")
   }
   
     if (insertion_errors == 1){
@@ -238,7 +259,7 @@ plot_by_type <- function(polisher_name,
 
   
 
-      p <- p + annotate("text", label=snp_label, x=45.5, y=92.3, colour="#1f78b4", lineheight = 0.9)
+      p <- p + annotate("text", label=Substitution_label, x=45.5, y=92.3, colour="#1f78b4", lineheight = 0.9)
       
     p <- p + annotate("text", label=insertion_label, x=45.5, y=77.3, colour="#ff7f0e", lineheight = 0.9)
 
@@ -260,16 +281,16 @@ plot_by_type <- function(polisher_name,
 
 
 
-p1 <- plot_by_type("polypolish", FALSE, FALSE )
-p2 <- plot_by_type("pypolca", FALSE, TRUE)
-p3 <- plot_by_type("polypolish-careful", FALSE, FALSE)
-p4 <- plot_by_type("pypolca-careful", FALSE, TRUE)
-p5 <- plot_by_type("fmlrc2", FALSE, FALSE)
-p6 <- plot_by_type("hypo", FALSE, TRUE)
-p7 <- plot_by_type("nextpolish", FALSE, FALSE)
-p8 <- plot_by_type("pilon", FALSE, TRUE)
+p1 <- plot_by_type("Polypolish-default", FALSE, FALSE )
+p2 <- plot_by_type("Pypolca-default", FALSE, TRUE)
+p3 <- plot_by_type("Polypolish-careful", FALSE, FALSE)
+p4 <- plot_by_type("Pypolca-careful", FALSE, TRUE)
+p5 <- plot_by_type("FMLRC2", FALSE, FALSE)
+p6 <- plot_by_type("HyPo", FALSE, TRUE)
+p7 <- plot_by_type("NextPolish", FALSE, FALSE)
+p8 <- plot_by_type("Pilon", FALSE, TRUE)
 
-jpeg(file = paste(plot_dir, "Supp_Figure9.jpeg", sep = "/" ), units = "in",
+jpeg(file = paste(plot_dir, "Supp_Figure6.jpeg", sep = "/" ), units = "in",
      width = 10,
      height = 12, bg = "transparent", res = 600)
 
