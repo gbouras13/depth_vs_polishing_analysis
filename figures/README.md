@@ -35,7 +35,7 @@
 <br><br><br><br>
 <p align="center"><img src="Supp_Figure6.png" alt="Figure S6" width="100%"></p>
 
-**Figure S6: total SNP, insertion, deletion and mixed errors by depth (25–50×).** Each plot shows the total number of substitutions (blue), insertions (orange), deletions (green) and mixed errors (purple) remaining in the nine reference genomes at each sufficient depth interval from 25–50× (x-axis) for each polisher tested. Mixed errors indicate errors where there is a mixture of substitutions, insertions and/or deletions in the same genomic region. The dashed lines represent the total Trycycler ONT-only assembly error count of 37 errors. The y-axis is limited at 100 errors for visualisation clarity: FMLRC2 and Pilon have error counts that exceed this maximum.
+**Figure S6: total substitution, insertion, deletion and mixed errors by depth (25–50×).** Each plot shows the total number of substitutions (blue), insertions (orange), deletions (green) and mixed errors (purple) remaining in the nine reference genomes at each sufficient depth interval from 25–50× (x-axis) for each polisher tested. Mixed errors indicate errors where there is a mixture of substitutions, insertions and/or deletions in the same genomic region. The dashed lines represent the total Trycycler ONT-only assembly error count of 37 errors. The y-axis is limited at 100 errors for visualisation clarity: FMLRC2 and Pilon have error counts that exceed this maximum.
 
 <br><br><br><br>
 <p align="center"><img src="Supp_Figure7.png" alt="Figure S7" width="100%"></p>
