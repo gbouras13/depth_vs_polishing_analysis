@@ -3,19 +3,21 @@
 This repository holds code and data for the _How Low Can You Go? Short-read polishing of Oxford Nanopore bacterial genome assemblies_ manuscript.
 
 Contents:
-* `main_analysis`: contains the read subsampling, polishing and plotting commands for the main analysis and most of the figures in the paper.
+* `figures`: contains all of the manuscript's main and supplementary figures along with their captions.
+* `supp_tables.xlsx`: contains the paper's supplementary tables.
 * `ont_assemblies`: contains the ONT-only [Trycycler](https://github.com/rrwick/Trycycler) assemblies used as a starting point for polishing.
 * `reference_assemblies`: contains the polished and manually curated assemblies used as a ground truth.
-* `reference_chromosome_assemblies_hybracter`: contains the polished and manually curated assemblies used as a ground truth, chromosomes only. Used for the Hybracter analysis.
-* `errors_in_repeats`: contains the details of the errors-in-repeats analysis shown in Figure S1.
-* `long_homopolymer`: contains the details of the long-homopolymer analysis shown in Figure S4.
-* `parameter_sweep`: contains the details of the low-depth parameter sweep analysis shown in Table S6.
-* `error_characterisation`: contains the detailed error characterisation of the 37 existing errors and all polisher introduced errors. The analysis is shown in Table S2 and Figures S5 and S6.
-* `low_quality_draft`: contains the details of the polishing analysis using low-quality draft assemblies shown in Figure S10.
-* `Figures`: contains all of the manuscript's man and supplementary figures.
-* `supp_tables.xlsx`: contains the paper's supplementary tables.
+* `pypolca_example_plot`: contains code to simulate reads, errors and make (Figure 1).
+* `main_analysis`: contains the read subsampling, polishing and plotting commands for the main analysis (Figures 2, S2, S3 and S7).
+* `errors_in_repeats`: contains the details of the errors-in-repeats analysis (Figure S1).
+* `long_homopolymer`: contains the details of the long-homopolymer analysis (Figure S4).
+* `error_characterisation`: contains the detailed error characterisation of the 37 existing errors and all polisher introduced errors (Table S2 and Figures S5 and S6).
 * `hybracter_analysis`: contains the read subsampling assembly and plotting commands for the [Hybracter](https://github.com/gbouras13/hybracter) analysis in the paper (Figures S8 and S9).
-* `pypolca_example_plot`: contains code to simulate reads, errors and make Figure 1.
+* `reference_chromosome_assemblies_hybracter`: contains the polished and manually curated assemblies used as a ground truth, chromosomes only. Used for the Hybracter analysis.
+* `low_quality_draft`: contains the details of the polishing analysis using low-quality draft assemblies (Figure S10).
+* `parameter_sweep`: contains the details of the low-depth parameter sweep analysis (Table S6).
+* `compare_assemblies.py`: assembly comparison script used for counting/characterising errors.
+
 
 ONT and Illumina reads are not included in this repository due to size, but they can be found on SRA:
 
