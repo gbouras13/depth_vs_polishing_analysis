@@ -93,9 +93,9 @@ cj_plot <- generate_plot("ATCC_33560_Campylobacter_jejuni", 5, "ATCC 33560", "Ca
 lm_plot <- generate_plot("ATCC_BAA-679_Listeria_monocytogenes", 0, "ATCC BAA-679", "Listeria monocytogenes")
 
 
-jpeg(file = paste(plot_dir, "Supp_Figure8.jpeg", sep = "/" ), units = "in", 
-     width = 9, 
-     height = 16, bg = "transparent", res = 600)
+png(file = paste(plot_dir, "Supp_Figure8.png", sep = "/" ), units = "in",
+    width = 10,
+    height = 12, bg = "transparent", res = 600)
 
 
 plot_grid(se_plot, vp_plot, 
@@ -162,7 +162,8 @@ generate_comp_plot <- function(df,genome_name, long_only_trycycler_threshold, at
     geom_point( size=1.25) + 
     theme_bw() +
     scale_x_continuous(limits = c(0, 50), expand = c(0, 0)) +
-    scale_y_continuous(limits = c(0, ymax), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, ymax), expand = c(0, 0),
+                       breaks = function(x) unique(floor(pretty(seq(min(x), (max(x) + 1) * 1.1))))) +
     labs(title= bquote(.(atcc_name) ~ italic(.(italics_name))) , x="Illumina depth", y="Errors") + 
           scale_color_manual(name = "Hybracter Logic Method",
                        labels = c("Best (ALE)", 
@@ -210,24 +211,20 @@ cl_plot <- generate_comp_plot(per_genome_results, "ATCC_35221_Campylobacter_lari
 cj_plot <- generate_comp_plot(per_genome_results, "ATCC_33560_Campylobacter_jejuni", 5, "ATCC 33560", "Campylobacter jejuni", FALSE)
 lm_plot <- generate_comp_plot(per_genome_results, "ATCC_BAA-679_Listeria_monocytogenes", 0, "ATCC BAA-679", "Listeria monocytogenes", FALSE)
 
-
 legend_plot <- cowplot::get_legend(se_plot_w_legend)
 
-grid <- plot_grid(
+
+png(file = paste(plot_dir, "Supp_Figure9.png", sep = "/" ), units = "in",
+    width = 10,
+    height = 12, bg = "transparent", res = 600)
+
+plot_grid(
   se_plot, vp_plot, 
   li_plot, ec_plot, 
   cl_plot, cj_plot, 
   lm_plot, legend_plot, 
   nrow = 4, align = 'hv'
 )
-
-
-
-jpeg(file = paste(plot_dir, "Supp_Figure9.jpeg", sep = "/" ), units = "in", 
-     width = 9, 
-     height = 16, bg = "transparent", res = 600)
-
-grid
 
 dev.off()
 

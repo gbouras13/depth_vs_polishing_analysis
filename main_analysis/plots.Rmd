@@ -156,9 +156,9 @@ p6 <- plot_to_45("hypo_errors", "HyPo", FALSE, TRUE, include_colours)
 p7 <- plot_to_45("nextpolish_errors", "NextPolish", FALSE, FALSE, include_colours)
 p8 <- plot_to_45("pilon_errors", "Pilon", FALSE, TRUE, include_colours)
 
-jpeg(file = paste(plot_dir, "Figure2.jpeg", sep = "/" ), units = "in",
-     width = 10,
-     height = 12, bg = "transparent", res = 600)
+png(file = paste(plot_dir, "Figure2.png", sep = "/" ), units = "in",
+    width = 10,
+    height = 12, bg = "transparent", res = 600)
 
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()
@@ -173,9 +173,9 @@ p6 <- plot_to_45("hypo_errors", "HyPo", FALSE, TRUE, include_colours)
 p7 <- plot_to_45("nextpolish_errors", "NextPolish", FALSE, FALSE, include_colours)
 p8 <- plot_to_45("pilon_errors", "Pilon", FALSE, TRUE, include_colours)
 
-jpeg(file = paste(plot_dir, "Supp_Figure3.jpeg", sep = "/" ), units = "in",
-     width = 10,
-     height = 12, bg = "transparent", res = 600)
+png(file = paste(plot_dir, "Supp_Figure3.png", sep = "/" ), units = "in",
+    width = 10,
+    height = 12, bg = "transparent", res = 600)
 
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()
@@ -253,9 +253,9 @@ p6 <- plot_to_45("pypolca_careful_polypolish_errors", "Pypolca-careful + Polypol
 p7 <- plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish-careful + Pypolca-careful", FALSE, FALSE)
 p8 <- plot_to_45("pypolca_careful_polypolish_careful_errors", "Pypolca-careful + Polypolish-careful", FALSE, TRUE)
 
-jpeg(file = paste(plot_dir, "Supp_Figure7.jpeg", sep = "/" ), units = "in",
-     width = 10,
-     height = 12, bg = "transparent", res = 600)
+png(file = paste(plot_dir, "Supp_Figure7.png", sep = "/" ), units = "in",
+    width = 10,
+    height = 12, bg = "transparent", res = 600)
 
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()
@@ -299,9 +299,9 @@ p8 <- plot_full_range("pilon_errors", "Pilon", FALSE, TRUE,include_colour=FALSE)
 
 
 
-jpeg(file = paste(plot_dir, "Supp_Figure2.jpeg", sep = "/" ), units = "in",
-     width = 10,
-     height = 12, bg = "transparent", res = 600)
+png(file = paste(plot_dir, "Supp_Figure2.png", sep = "/" ), units = "in",
+    width = 10,
+    height = 12, bg = "transparent", res = 600)
 
 
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')

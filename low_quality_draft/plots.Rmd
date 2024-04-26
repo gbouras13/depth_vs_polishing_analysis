@@ -114,9 +114,9 @@ p6 <- plot_full_range("hypo_errors", "HyPo", FALSE, TRUE)
 p7 <- plot_full_range("nextpolish_errors", "NextPolish", FALSE, FALSE)
 p8 <- plot_full_range("pilon_errors", "Pilon", FALSE, TRUE)
 
-jpeg(file = paste(plot_dir, "Supp_Figure10.jpeg", sep = "/" ), units = "in",
-     width = 10,
-     height = 12, bg = "transparent", res = 600)
+png(file = paste(plot_dir, "Supp_Figure10.png", sep = "/" ), units = "in",
+    width = 10,
+    height = 12, bg = "transparent", res = 600)
 
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()

@@ -121,7 +121,12 @@ plot_full_range <- function(polisher_name,
    peak_label = paste("peak introduced:\n", peak_errors, " errors",  sep="")   
   }
   
-  min_label = paste("min existing:\n", min_errors, " errors\n", sep="")   
+  if (min_errors ==1 ){
+  min_label = paste("min existing:\n", min_errors, " error\n",  sep="")
+  }
+  else {
+    min_label = paste("min existing:\n", min_errors, " errors\n", sep="")
+  }
   
   max_y <- 100
 
@@ -160,9 +165,9 @@ p6 <- plot_full_range("HyPo", FALSE, TRUE, include_colours)
 p7 <- plot_full_range("NextPolish", FALSE, FALSE, include_colours)
 p8 <- plot_full_range("Pilon", FALSE, TRUE, include_colours)
 
-jpeg(file = paste(plot_dir, "Supp_Figure5.jpeg", sep = "/" ), units = "in",
-     width = 10,
-     height = 12, bg = "transparent", res = 600)
+png(file = paste(plot_dir, "Supp_Figure5.png", sep = "/" ), units = "in",
+    width = 10,
+    height = 12, bg = "transparent", res = 600)
 
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()
@@ -290,9 +295,9 @@ p6 <- plot_by_type("HyPo", FALSE, TRUE)
 p7 <- plot_by_type("NextPolish", FALSE, FALSE)
 p8 <- plot_by_type("Pilon", FALSE, TRUE)
 
-jpeg(file = paste(plot_dir, "Supp_Figure6.jpeg", sep = "/" ), units = "in",
-     width = 10,
-     height = 12, bg = "transparent", res = 600)
+png(file = paste(plot_dir, "Supp_Figure6.png", sep = "/" ), units = "in",
+    width = 10,
+    height = 12, bg = "transparent", res = 600)
 
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()
