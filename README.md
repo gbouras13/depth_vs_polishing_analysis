@@ -1,6 +1,9 @@
 # How Low Can You Go? Short-read polishing of Oxford Nanopore bacterial genome assemblies Code Repository
 
-This repository holds code and data for the _How Low Can You Go? Short-read polishing of Oxford Nanopore bacterial genome assemblies_ manuscript.
+This repository holds code and data for this manuscript:<br>
+[Bouras G, Judd LM, Edwards RA, Vreugde S, Stinear TP, Wick RR. How low can you go? Short-read polishing of Oxford Nanopore bacterial genome assemblies. Microbial Genomics. 2024. doi:10.1099/mgen.0.001254.](https://doi.org/10.1099/mgen.0.001254)
+
+
 
 Contents:
 * `figures`: contains all of the manuscript's main and supplementary figures along with their captions.
