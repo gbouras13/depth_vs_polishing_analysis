@@ -36,6 +36,8 @@ per_genome_results$total_error <- per_genome_results$Existing + per_genome_resul
 # to make the names match Figure 2
 per_genome_results$polisher <- gsub("fmlrc2", "FMLRC2", per_genome_results$polisher )
 
+per_genome_results$polisher <- gsub("hapog", "Hapo-G", per_genome_results$polisher )
+
 per_genome_results$polisher <- gsub("hypo", "HyPo", per_genome_results$polisher )
 
 per_genome_results$polisher <- gsub("pilon", "Pilon", per_genome_results$polisher )
@@ -50,6 +52,7 @@ per_genome_results$polisher <- gsub("polypolish", "Polypolish-default", per_geno
 per_genome_results$polisher <- gsub("pypolca-careful", "Pypolca-careful", per_genome_results$polisher )
 
 per_genome_results$polisher <- gsub("pypolca", "Pypolca-default", per_genome_results$polisher )
+
 
 
 per_genome_results_introduced_df <- per_genome_results %>% dplyr::select(polisher,
@@ -164,14 +167,18 @@ p5 <- plot_full_range("FMLRC2", FALSE, FALSE, include_colours)
 p6 <- plot_full_range("HyPo", FALSE, TRUE, include_colours)
 p7 <- plot_full_range("NextPolish", FALSE, FALSE, include_colours)
 p8 <- plot_full_range("Pilon", FALSE, TRUE, include_colours)
-
 png(file = paste(plot_dir, "Supp_Figure5.png", sep = "/" ), units = "in",
     width = 10,
     height = 12, bg = "transparent", res = 600)
-
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()
 
+p <- plot_full_range("Hapo-G", FALSE, FALSE, include_colours)
+png(file = paste(plot_dir, "Supp_Figure5_Hapo-G.png", sep = "/" ), units = "in",
+    width = 5,
+    height = 3, bg = "transparent", res = 600)
+p
+dev.off()
 ```
 
 Plot insertions, deletions, Substitutions and mixed 
@@ -286,7 +293,7 @@ plot_by_type <- function(polisher_name,
 
 
 
-p1 <- plot_by_type("Polypolish-default", FALSE, FALSE )
+p1 <- plot_by_type("Polypolish-default", FALSE, FALSE)
 p2 <- plot_by_type("Pypolca-default", FALSE, TRUE)
 p3 <- plot_by_type("Polypolish-careful", FALSE, FALSE)
 p4 <- plot_by_type("Pypolca-careful", FALSE, TRUE)
@@ -294,12 +301,18 @@ p5 <- plot_by_type("FMLRC2", FALSE, FALSE)
 p6 <- plot_by_type("HyPo", FALSE, TRUE)
 p7 <- plot_by_type("NextPolish", FALSE, FALSE)
 p8 <- plot_by_type("Pilon", FALSE, TRUE)
-
 png(file = paste(plot_dir, "Supp_Figure6.png", sep = "/" ), units = "in",
     width = 10,
     height = 12, bg = "transparent", res = 600)
-
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()
 
+
+
+p <-plot_by_type("Hapo-G", FALSE, FALSE)
+png(file = paste(plot_dir, "Supp_Figure6_Hapo-G.png", sep = "/" ), units = "in",
+    width = 5,
+    height = 3, bg = "transparent", res = 600)
+p
+dev.off()
 ```

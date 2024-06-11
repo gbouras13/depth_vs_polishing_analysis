@@ -122,7 +122,7 @@ mean_read_lengths["ATCC_BAA-679_Listeria_monocytogenes"]=120.3243788
 
 Create the subsampled reads at 0.1x intervals up to 50.0x using [`seqtk sample`](https://github.com/lh3/seqtk). I used the read count as the random seed value so I could regenerate the exact same read sets as needed:
 ```bash
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         mkdir -p "$base_dir"/"$d"/"$a"
         cd "$base_dir"/"$d"/"$a"
@@ -144,7 +144,7 @@ done
 
 Gzip the reads to save space:
 ```bash
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/"$d"/"$a"
         pigz -p8 reads_1.fastq reads_2.fastq
@@ -155,7 +155,7 @@ done
 Make a read info table:
 ```bash
 printf "genome\tgenome_size\ttarget_illumina_depth\tread_count\tread_bases\tactual_illumina_depth\n" > "$base_dir"/reads.tsv
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/"$d"/"$a"
         genome_size=${genome_sizes["$a"]}
@@ -173,7 +173,7 @@ done
 
 Polypolish v0.6.0 (both defaults and --careful):
 ```bash
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/"$d"/"$a"
         draft="$base_dir"/drafts/"$a".fasta
@@ -192,7 +192,7 @@ done
 
 pypolca v0.3.0 (both defaults and --careful):
 ```bash
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/"$d"/"$a"
         draft="$base_dir"/drafts/"$a".fasta
@@ -214,7 +214,7 @@ HyPo v1.0.3:
 ```bash
 conda activate hypo
 
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/"$d"/"$a"
         while [[ ! -f "hypo.fasta.gz" ]]; do  # HyPo randomly fails a lot when depth <5, so repeated tries are necessary.
@@ -236,7 +236,7 @@ done
 
 FMLRC2 v0.1.8:
 ```bash
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/"$d"/"$a"
         draft="$base_dir"/drafts/"$a".fasta
@@ -254,7 +254,7 @@ NextPolish v1.4.1 (1](https://nextpolish.readthedocs.io/en/latest/TUTORIAL.html)
 ```bash
 conda activate nextdenovo
 
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/"$d"/"$a"
         draft="$base_dir"/drafts/"$a".fasta
@@ -266,7 +266,7 @@ for d in $(seq -f "%04.1f" 0.1 0.1 50); do
         bwa mem -t 24 nextpolish_temp.fasta reads_1.fastq.gz reads_2.fastq.gz | samtools view --threads 3 -F 0x4 -b - | samtools fixmate -m --threads 3  - - | samtools sort -m 2g --threads 5 - | samtools markdup --threads 5 -r - sgs.sort.bam
         samtools index sgs.sort.bam
         samtools faidx nextpolish_temp.fasta
-        python "$nextpolish_dir"/lib/nextpolish1.py -g nextpolish_temp.fasta -t 2 -p 24 -s sgs.sort.bam 2>> nextpolish.txt | seqkit sort -l -r | seqtk seq -U > nextpolish.fasta 
+        python "$nextpolish_dir"/lib/nextpolish1.py -g nextpolish_temp.fasta -t 2 -p 24 -s sgs.sort.bam 2>> nextpolish.txt | seqkit sort -l -r | seqtk seq -U > nextpolish.fasta
         rm sgs.sort.bam* nextpolish_temp.fasta*
 
         gzip nextpolish.fasta
@@ -276,7 +276,7 @@ done
 
 Pilon v1.24:
 ```bash
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/"$d"/"$a"
         draft="$base_dir"/drafts/"$a".fasta
@@ -309,7 +309,7 @@ All possible combinations of Polypolish and pypolca:
 
 pypolca on Polypolish:
 ```bash
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/"$d"/"$a"
         draft="$base_dir"/drafts/"$a".fasta
@@ -338,7 +338,7 @@ done
 
 Polypolish on pypolca:
 ```bash
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/"$d"/"$a"
         draft="$base_dir"/drafts/"$a".fasta
@@ -371,7 +371,7 @@ done
 
 Assess assemblies with [`compare_assemblies.py`](https://github.com/rrwick/Perfect-bacterial-genome-tutorial/wiki/Comparing-assemblies) script:
 ```bash
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/"$d"/"$a"
         ref="$base_dir"/references/"$a".fasta
@@ -399,7 +399,7 @@ done
 Produce TSV file of results:
 ```bash
 printf "genome\ttarget_illumina_depth\tpolishing\tremaining_errors\n" > "$base_dir"/results.tsv
-for d in $(seq -f "%04.1f" 0.1 0.1 50); do 
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
     for a in "${genomes[@]}"; do
         cd "$base_dir"/"$d"/"$a"
         ref="$base_dir"/references/"$a".fasta
@@ -419,6 +419,53 @@ for d in $(seq -f "%04.1f" 0.1 0.1 50); do
         if [[ -f "pypolca-careful__polypolish-careful.errors" ]]; then printf "$a\t$d\tpypolca-careful+Polypolish-careful\t"$(cat pypolca-careful__polypolish-careful.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
         if [[ -f "pypolca__polypolish-careful.errors" ]]; then printf "$a\t$d\tpypolca+Polypolish-careful\t"$(cat pypolca__polypolish-careful.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
         if [[ -f "pypolca-careful__polypolish.errors" ]]; then printf "$a\t$d\tpypolca-careful+Polypolish\t"$(cat pypolca-careful__polypolish.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
+    done
+done
+```
+
+
+
+## Hapo-G
+
+The paper didn't include [Hapo-G](https://github.com/institut-de-genomique/HAPO-G), so this analysis occurred after the paper's publication.
+
+Run Hapo-G v1.3.8:
+```bash
+conda activate hapog
+
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
+    for a in "${genomes[@]}"; do
+        cd "$base_dir"/"$d"/"$a"
+        draft="$base_dir"/drafts/"$a".fasta
+
+        hapog --genome "$draft" --pe1 reads_1.fastq.gz --pe2 reads_2.fastq.gz -o hapog -t 24 -u > hapog.txt 2>&1
+        seqtk seq hapog/hapog_results/hapog.fasta > hapog.fasta
+        rm -r hapog
+
+        gzip hapog.fasta
+    done
+done
+```
+
+Assess assemblies:
+```bash
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
+    for a in "${genomes[@]}"; do
+        cd "$base_dir"/"$d"/"$a"
+        ref="$base_dir"/references/"$a".fasta
+        if [[ -f "hapog.fasta.gz" && ! -f "hapog.errors" ]]; then compare_assemblies.py --aligner edlib "$ref" hapog.fasta.gz > hapog.errors &; fi
+    done
+    wait
+done
+```
+
+Add to results TSV:
+```bash
+for d in $(seq -f "%04.1f" 0.1 0.1 50); do
+    for a in "${genomes[@]}"; do
+        cd "$base_dir"/"$d"/"$a"
+        ref="$base_dir"/references/"$a".fasta
+        if [[ -f "hapog.errors" ]]; then printf "$a\t$d\tHapo-G\t"$(cat hapog.errors | grep -o "*" | wc -l)"\n" >> "$base_dir"/results.tsv; fi
     done
 done
 ```

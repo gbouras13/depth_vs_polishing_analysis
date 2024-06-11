@@ -89,7 +89,7 @@ def main():
     depth_list = [float(x) / 10 for x in depth_list]
 
     genomes = ["ATCC_10708_Salmonella_enterica","ATCC_19119_Listeria_ivanovii","ATCC_35221_Campylobacter_lari", "ATCC_14035_Vibrio_cholerae", "ATCC_25922_Escherichia_coli", "ATCC_35897_Listeria_welshimeri", "ATCC_17802_Vibrio_parahaemolyticus", "ATCC_33560_Campylobacter_jejuni", "ATCC_BAA-679_Listeria_monocytogenes"]
-    polishers = ["fmlrc2","hypo","nextpolish","pilon","polypolish-careful", "polypolish", "pypolca", "pypolca-careful"]
+    polishers = ["fmlrc2", "hapog", "hypo", "nextpolish", "pilon", "polypolish-careful", "polypolish", "pypolca", "pypolca-careful"]
 
     data_list = []
 

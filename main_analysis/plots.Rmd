@@ -57,6 +57,7 @@ introduced$HyPo_introduced <- ifelse(introduced$HyPo - introduced$before_polish 
 introduced$FMLRC2_introduced <- ifelse(introduced$FMLRC2 - introduced$before_polish > 0, TRUE, FALSE)
 introduced$NextPolish_introduced <- ifelse(introduced$NextPolish - introduced$before_polish > 0, TRUE, FALSE)
 introduced$Pilon_introduced <- ifelse(introduced$Pilon - introduced$before_polish > 0, TRUE, FALSE)
+introduced$`Hapo-G_introduced` <- ifelse(introduced$`Hapo-G` - introduced$before_polish > 0, TRUE, FALSE)
 introduced$`Polypolish+pypolca_introduced` <- ifelse(introduced$`Polypolish+pypolca` - introduced$before_polish > 0, TRUE, FALSE)
 introduced$`Polypolish-careful+pypolca-careful_introduced` <- ifelse(introduced$`Polypolish-careful+pypolca-careful` - introduced$before_polish > 0, TRUE, FALSE)
 introduced$`Polypolish-careful+pypolca_introduced` <- ifelse(introduced$`Polypolish-careful+pypolca` - introduced$before_polish > 0, TRUE, FALSE)
@@ -85,6 +86,8 @@ total_results <- introduced %>%
             nextpolish_introduced = any(NextPolish_introduced),
             pilon_errors = sum(Pilon),
             pilon_introduced = any(Pilon_introduced),
+            hapog_errors = sum(`Hapo-G`),
+            hapog_introduced = any(`Hapo-G_introduced`),
             polypolish_pypolca_errors = sum(`Polypolish+pypolca`),
             polypolish_pypolca_introduced = any(`Polypolish+pypolca_introduced`),
             polypolish_careful_pypolca_careful_errors = sum(`Polypolish-careful+pypolca-careful`),
@@ -110,8 +113,6 @@ introduced_df <- introduced
 colnames(introduced_df) <- gsub("_introduced", "_overall_decreased_accuracy", colnames(introduced_df) )
 
 write.csv(introduced_df, file = "all_depths_errors.csv")
-
-
 ```
 
 Plot the total errors vs Illumina depth for each polisher and polisher combination. These plots cap the y-axis at 45 and indicate peak errors with text as necessary:
@@ -155,12 +156,18 @@ p5 <- plot_to_45("fmlrc2_errors", "FMLRC2", FALSE, FALSE, include_colours)
 p6 <- plot_to_45("hypo_errors", "HyPo", FALSE, TRUE, include_colours)
 p7 <- plot_to_45("nextpolish_errors", "NextPolish", FALSE, FALSE, include_colours)
 p8 <- plot_to_45("pilon_errors", "Pilon", FALSE, TRUE, include_colours)
-
 png(file = paste(plot_dir, "Figure2.png", sep = "/" ), units = "in",
     width = 10,
     height = 12, bg = "transparent", res = 600)
-
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
+dev.off()
+
+include_colours = FALSE
+p <- plot_to_45("hapog_errors", "Hapo-G", FALSE, FALSE, include_colours)
+png(file = paste(plot_dir, "Figure2_Hapo-G.png", sep = "/" ), units = "in",
+    width = 5,
+    height = 3, bg = "transparent", res = 600)
+p
 dev.off()
 
 include_colours = TRUE
@@ -172,19 +179,24 @@ p5 <- plot_to_45("fmlrc2_errors", "FMLRC2", FALSE, FALSE, include_colours)
 p6 <- plot_to_45("hypo_errors", "HyPo", FALSE, TRUE, include_colours)
 p7 <- plot_to_45("nextpolish_errors", "NextPolish", FALSE, FALSE, include_colours)
 p8 <- plot_to_45("pilon_errors", "Pilon", FALSE, TRUE, include_colours)
-
 png(file = paste(plot_dir, "Supp_Figure3.png", sep = "/" ), units = "in",
     width = 10,
     height = 12, bg = "transparent", res = 600)
-
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
+dev.off()
+
+include_colours = TRUE
+p <- plot_to_45("hapog_errors", "Hapo-G", FALSE, FALSE, include_colours)
+png(file = paste(plot_dir, "Supp_Figure3_Hapo-G.png", sep = "/" ), units = "in",
+    width = 5,
+    height = 3, bg = "transparent", res = 600)
+p
 dev.off()
 ```
 
 Count introduced per interval
 
 ```{r overall per interval}
-
 print("Polypolish default per genome introduction - at least 1/9")
 table(total_results$polypolish_introduced)
 
@@ -208,14 +220,12 @@ table(total_results$nextpolish_introduced)
 
 print("FMLRC2 per genome introduction - at least 1/9")
 table(total_results$fmlrc2_introduced)
-
 ```
 
 
 Count introduced per genome
 
 ```{r overall per genome}
-
 print("Polypolish default per genome introduction - at least 1/9")
 table(introduced$Polypolish_introduced)
 
@@ -239,7 +249,6 @@ table(introduced$NextPolish_introduced)
 
 print("FMLRC2 per genome introduction - at least 1/9")
 table(introduced$FMLRC2_introduced)
-
 ```
 
 
@@ -252,11 +261,9 @@ p5 <- plot_to_45("polypolish_pypolca_careful_errors", "Polypolish-default + Pypo
 p6 <- plot_to_45("pypolca_careful_polypolish_errors", "Pypolca-careful + Polypolish-default", FALSE, TRUE)
 p7 <- plot_to_45("polypolish_careful_pypolca_careful_errors", "Polypolish-careful + Pypolca-careful", FALSE, FALSE)
 p8 <- plot_to_45("pypolca_careful_polypolish_careful_errors", "Pypolca-careful + Polypolish-careful", FALSE, TRUE)
-
 png(file = paste(plot_dir, "Supp_Figure7.png", sep = "/" ), units = "in",
     width = 10,
     height = 12, bg = "transparent", res = 600)
-
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()
 ```
@@ -289,29 +296,30 @@ plot_full_range <- function(column_name, polisher_name, no_x = FALSE, no_y = FAL
 }
 
 p1 <- plot_full_range("polypolish_errors", "Polypolish-default", FALSE, FALSE, include_colour=FALSE)
-p2 <- plot_full_range("pypolca_errors", "Pypolca-default", FALSE, TRUE,include_colour=FALSE)
-p3 <- plot_full_range("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE,include_colour=FALSE)
-p4 <- plot_full_range("pypolca_careful_errors", "Pypolca-careful", FALSE, TRUE,include_colour=FALSE)
-p5 <- plot_full_range("fmlrc2_errors", "FMLRC2", FALSE, FALSE,include_colour=FALSE)
-p6 <- plot_full_range("hypo_errors", "HyPo", FALSE, TRUE,include_colour=FALSE)
-p7 <- plot_full_range("nextpolish_errors", "NextPolish", FALSE, FALSE,include_colour=FALSE)
-p8 <- plot_full_range("pilon_errors", "Pilon", FALSE, TRUE,include_colour=FALSE)
-
-
-
+p2 <- plot_full_range("pypolca_errors", "Pypolca-default", FALSE, TRUE, include_colour=FALSE)
+p3 <- plot_full_range("polypolish_careful_errors", "Polypolish-careful", FALSE, FALSE, include_colour=FALSE)
+p4 <- plot_full_range("pypolca_careful_errors", "Pypolca-careful", FALSE, TRUE, include_colour=FALSE)
+p5 <- plot_full_range("fmlrc2_errors", "FMLRC2", FALSE, FALSE, include_colour=FALSE)
+p6 <- plot_full_range("hypo_errors", "HyPo", FALSE, TRUE, include_colour=FALSE)
+p7 <- plot_full_range("nextpolish_errors", "NextPolish", FALSE, FALSE, include_colour=FALSE)
+p8 <- plot_full_range("pilon_errors", "Pilon", FALSE, TRUE, include_colour=FALSE)
 png(file = paste(plot_dir, "Supp_Figure2.png", sep = "/" ), units = "in",
     width = 10,
     height = 12, bg = "transparent", res = 600)
-
-
 plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
-
 dev.off()
 
+include_colours = TRUE
+p <- plot_full_range("hapog_errors", "Hapo-G", FALSE, TRUE, include_colour=FALSE)
+png(file = paste(plot_dir, "Supp_Figure2_Hapo-G.png", sep = "/" ), units = "in",
+    width = 5,
+    height = 3, bg = "transparent", res = 600)
+p
+dev.off()
 ```
 
 For each individual polisher, count how many times it made an input assembly better/worse and draw a stacked-bar plot:
-```{r better_or_worse, fig.width = 8, fig.height = 4.5}
+```{r better_or_worse, fig.width = 8.5, fig.height = 4.5}
 count_results <- function(tool_name, data) {
   tibble(
     Tool = tool_name,
@@ -321,13 +329,13 @@ count_results <- function(tool_name, data) {
   )
 }
 
-made_better_or_worse <- map_dfr(c("Polypolish", "Polypolish-careful", "pypolca", "pypolca-careful", "HyPo", "FMLRC2", "NextPolish", "Pilon"),
+made_better_or_worse <- map_dfr(c("Polypolish", "Polypolish-careful", "pypolca", "pypolca-careful", "HyPo", "FMLRC2", "NextPolish", "Pilon", "Hapo-G"),
                                 count_results, data = per_genome_results)
 
 made_better_or_worse <- made_better_or_worse %>%
   pivot_longer(cols = -Tool, names_to = "Outcome", values_to = "Count") %>%
   mutate(Outcome = factor(Outcome, levels = c("better", "same", "worse"))) %>%
-  mutate(Tool = factor(Tool, levels = c("pypolca", "pypolca-careful", "Polypolish", "Polypolish-careful", "FMLRC2", "HyPo", "NextPolish", "Pilon")))
+  mutate(Tool = factor(Tool, levels = c("pypolca", "pypolca-careful", "Polypolish", "Polypolish-careful", "FMLRC2", "HyPo", "NextPolish", "Pilon", "Hapo-G")))
 
 # Create the stacked-bar plot
 ggplot(made_better_or_worse, aes(x = Tool, y = Count, fill = Outcome)) +
@@ -338,7 +346,7 @@ ggplot(made_better_or_worse, aes(x = Tool, y = Count, fill = Outcome)) +
                                "same" = "#ffffbf",
                                "worse" = "#f46d43")) +
   scale_y_continuous(expand = c(0, 0)) + 
-  scale_x_discrete(labels = c("pypolca-\ndefault", "pypolca\n-careful", "Polypolish-\ndefault", "Polypolish-\ncareful", "FMLRC2", "HyPo", "NextPolish", "Pilon"))
+  scale_x_discrete(labels = c("pypolca-\ndefault", "pypolca\n-careful", "Polypolish-\ndefault", "Polypolish-\ncareful", "FMLRC2", "HyPo", "NextPolish", "Pilon", "Hapo-G"))
 ```
 
 For each depth range (groups of 10x), determine which polisher/combination gave the best overall results:
@@ -368,7 +376,6 @@ for (min_depth in seq(0, 45, interval)) {
 What is the lowest depth that the polishers don't introduce errors?
 
 ```{r}
-
 # Function to find the first row where value is 37 or lower for a given column
 # at least 2x
 find_first_row_below_threshold <- function(data, column_name, threshold) {
@@ -393,11 +400,6 @@ first_row <- find_first_row_below_threshold(data, "fmlrc2_errors", threshold)
 first_row <- find_first_row_below_threshold(data, "hypo_errors", threshold)
 first_row <- find_first_row_below_threshold(data, "nextpolish_errors", threshold)
 first_row <- find_first_row_below_threshold(data, "pilon_errors", threshold)
-
-
-
-
-
 ```
 
 
@@ -454,7 +456,6 @@ total_results %>%  filter(depth >= 25) %>%
 Get the means by each 5x depth bin for the 3 best polishers (Table 3)
 
 ```{r}
-
 df_subset <- total_results[, c("depth","polypolish_careful_errors", "pypolca_careful_errors", "polypolish_errors")]
 
 errors_by_bin <- df_subset %>%  
@@ -475,18 +476,11 @@ errors_by_bin <- df_subset %>%
   )
 
 errors_by_bin %>%  view()
-
-
-
 ```
 
 
 Get mean min max errors from 25+ for combination polishers
 ```{r}
-
-
-
-
 total_results %>%  filter(depth >= 25) %>% 
   pivot_longer(cols = polypolish_pypolca_errors:pypolca_polypolish_careful_errors,
                names_to = "polisher", values_to = "value") %>%
@@ -501,16 +495,11 @@ total_results %>%  filter(depth >= 25) %>%
     worse = sum(value > 37, na.rm = TRUE),
     equal = sum(value == 37, na.rm = TRUE),
   )
-
-
-
-
 ```
 
 Get the means by each 5x depth bin
 
 ```{r}
-
 errors_by_bin <- total_results %>%  filter(depth >= 0 ) %>% 
   mutate(bin = cut(depth, breaks = seq(0, max(depth) + 5, by = 5), include.lowest = TRUE)) %>%
   pivot_longer(cols = polypolish_pypolca_errors:pypolca_polypolish_careful_errors,
