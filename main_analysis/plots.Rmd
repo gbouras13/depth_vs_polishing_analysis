@@ -310,7 +310,7 @@ plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, nrow=4, align = 'hv')
 dev.off()
 
 include_colours = TRUE
-p <- plot_full_range("hapog_errors", "Hapo-G", FALSE, TRUE, include_colour=FALSE)
+p <- plot_full_range("hapog_errors", "Hapo-G", FALSE, FALSE, include_colour=FALSE)
 png(file = paste(plot_dir, "Supp_Figure2_Hapo-G.png", sep = "/" ), units = "in",
     width = 5,
     height = 3, bg = "transparent", res = 600)

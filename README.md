@@ -20,6 +20,7 @@ Contents:
 * `low_quality_draft`: contains the details of the polishing analysis using low-quality draft assemblies (Figure S10).
 * `parameter_sweep`: contains the details of the low-depth parameter sweep analysis (Table S6).
 * `compare_assemblies.py`: assembly comparison script used for counting/characterising errors.
+* `hapog`: contains additional figure panels for Hapo-G results (produced after the manuscript was published).
 
 
 ONT and Illumina reads are not included in this repository due to size, but they can be found on SRA:
